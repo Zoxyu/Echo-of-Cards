@@ -1,0 +1,210 @@
+/* pages/index/index.wxss —— 首页样式 */
+
+.page {
+  padding: 0 32rpx 120rpx;
+}
+
+/* ---------- 品牌区 ---------- */
+.hero {
+  padding: 56rpx 8rpx 24rpx;
+}
+.hero-badge {
+  display: inline-block;
+  font-size: var(--fs-1);
+  letter-spacing: 8rpx;
+  color: var(--accent);
+  border: 1rpx solid var(--accent-deep);
+  border-radius: var(--r-full);
+  padding: 6rpx 20rpx;
+  margin-bottom: 20rpx;
+}
+.hero-title {
+  font-size: 72rpx;
+  font-weight: 800;
+  letter-spacing: 6rpx;
+  line-height: 1.1;
+}
+.hero-sub {
+  margin-top: 12rpx;
+  color: var(--text-dim);
+  font-size: var(--fs-2);
+  letter-spacing: 4rpx;
+}
+
+/* ---------- 模式卡片 ---------- */
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+.mode-card {
+  background: var(--bg-card);
+  border: 2rpx solid var(--line-soft);
+  border-radius: var(--r-2);
+  padding: 26rpx 24rpx;
+  transition: all 0.2s ease;
+}
+.mode-card.mode-on {
+  border-color: var(--accent);
+  background: linear-gradient(160deg, rgba(245, 185, 66, 0.16), rgba(245, 185, 66, 0.04));
+  box-shadow: 0 8rpx 32rpx rgba(245, 185, 66, 0.12);
+}
+.mode-name {
+  font-size: var(--fs-3);
+  font-weight: 700;
+}
+.mode-on .mode-name {
+  color: var(--accent);
+}
+.mode-count {
+  font-size: var(--fs-1);
+  color: var(--text-faint);
+}
+.mode-desc {
+  margin-top: 10rpx;
+  font-size: var(--fs-1);
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ---------- 目标分 ---------- */
+.target-card {
+  margin-top: 20rpx;
+}
+.target-label {
+  font-weight: 700;
+}
+.target-hint {
+  font-size: var(--fs-1);
+  margin-top: 6rpx;
+}
+.target-input {
+  width: 220rpx;
+  text-align: right;
+  font-size: var(--fs-5);
+  font-weight: 800;
+  color: var(--accent);
+}
+
+/* ---------- 人数宫格 ---------- */
+.count-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12rpx;
+}
+.count-cell {
+  text-align: center;
+  padding: 18rpx 0;
+  border-radius: var(--r-1);
+  background: var(--bg-card);
+  border: 2rpx solid var(--line-soft);
+  font-size: var(--fs-2);
+  color: var(--text-dim);
+}
+.count-cell.count-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+.count-cell.count-disabled {
+  opacity: 0.35;
+}
+.fixed-hint {
+  margin-top: 14rpx;
+  font-size: var(--fs-1);
+}
+
+/* ---------- 玩家列表 ---------- */
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+.player-row {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1rpx solid var(--line-soft);
+  border-radius: var(--r-2);
+  padding: 18rpx 24rpx;
+}
+.player-name {
+  flex: 1;
+  margin: 0 24rpx;
+  font-size: var(--fs-3);
+}
+.color-tip {
+  font-size: var(--fs-1);
+}
+
+/* ---------- 开始按钮 ---------- */
+.start-btn {
+  margin-top: var(--sp-5);
+  font-size: var(--fs-4);
+  padding: 30rpx;
+  letter-spacing: 8rpx;
+}
+
+/* ---------- 进行中对局 ---------- */
+.active-card {
+  margin-bottom: 20rpx;
+}
+.active-mode {
+  font-size: var(--fs-3);
+  font-weight: 700;
+  margin-right: 16rpx;
+}
+.active-meta {
+  font-size: var(--fs-1);
+}
+.active-bottom {
+  margin-top: 22rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx solid var(--line-soft);
+}
+.avatar-sm {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 14rpx;
+  font-size: var(--fs-1);
+  margin-right: 14rpx;
+}
+.active-name {
+  margin-right: 12rpx;
+  font-size: var(--fs-2);
+}
+.active-total {
+  font-weight: 800;
+  font-size: var(--fs-3);
+  color: var(--accent);
+}
+.continue-tag {
+  font-size: var(--fs-2);
+  color: var(--accent);
+  background: rgba(245, 185, 66, 0.12);
+  border-radius: var(--r-full);
+  padding: 8rpx 24rpx;
+}
+
+/* ---------- 历史入口 ---------- */
+.history-entry {
+  margin-top: var(--sp-5);
+  background: var(--bg-soft);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-2);
+  padding: 30rpx 32rpx;
+  font-weight: 600;
+}
+.history-arrow {
+  font-size: var(--fs-4);
+  color: var(--accent);
+}
+
+.page-foot {
+  margin-top: var(--sp-5);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: var(--fs-1);
+  letter-spacing: 2rpx;
+}

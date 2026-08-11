@@ -1,0 +1,119 @@
+<!--pages/index/index.wxml —— 首页：上半部分开局配置，下半部分进行中对局-->
+<view class="page">
+
+  <!-- 品牌区 -->
+  <view class="hero">
+    <view class="hero-badge">ECHO OF CARDS</view>
+    <view class="hero-title">落牌有声</view>
+    <view class="hero-sub">牌桌积分 · 即落即记</view>
+  </view>
+
+  <!-- 模式选择 -->
+  <view class="section-title">选择模式</view>
+  <view class="mode-grid">
+    <view
+      wx:for="{{modes}}"
+      wx:key="id"
+      class="mode-card {{selectedModeId === item.id ? 'mode-on' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onSelectMode"
+    >
+      <view class="flex jcb aic">
+        <text class="mode-name">{{item.name}}</text>
+        <text class="mode-count">{{item.countText}}</text>
+      </view>
+      <view class="mode-desc">{{item.desc}}</view>
+    </view>
+  </view>
+
+  <!-- target 模式：目标分输入 -->
+  <view wx:if="{{isTargetMode}}" class="card target-card flex aic jcb">
+    <view>
+      <view class="target-label">目标分</view>
+      <view class="faint target-hint">有人总分达到即终局</view>
+    </view>
+    <input
+      class="target-input"
+      type="number"
+      value="{{targetScore}}"
+      bindinput="onTargetInput"
+      placeholder="500"
+    />
+  </view>
+
+  <!-- 人数模板 -->
+  <view class="section-title">玩家人数</view>
+  <view class="count-grid">
+    <view
+      wx:for="{{counts}}"
+      wx:key="*this"
+      class="count-cell {{playerCount === item ? 'count-on' : ''}} {{countDisabled ? 'count-disabled' : ''}}"
+      data-n="{{item}}"
+      bindtap="onSelectCount"
+    >{{item}}人</view>
+  </view>
+  <view wx:if="{{countDisabled}}" class="faint fixed-hint">斗地主固定 3 人，人数不可调整</view>
+
+  <!-- 玩家列表 -->
+  <view class="section-title">玩家列表</view>
+  <view class="player-list">
+    <view wx:for="{{players}}" wx:key="id" class="player-row">
+      <view
+        class="avatar"
+        style="background: {{item.color}}"
+        data-index="{{index}}"
+        bindtap="onColorTap"
+      >{{item.short}}</view>
+      <input
+        class="player-name"
+        value="{{item.name}}"
+        data-index="{{index}}"
+        bindinput="onNameInput"
+        maxlength="8"
+        placeholder="玩家{{index + 1}}"
+      />
+      <text class="faint color-tip">点色块换色</text>
+    </view>
+  </view>
+
+  <!-- 开始对局 -->
+  <button class="btn btn-primary start-btn" bindtap="onStartGame">开始对局</button>
+
+  <!-- 进行中对局 -->
+  <view class="section-title">进行中对局</view>
+  <block wx:if="{{hasActive}}">
+    <view
+      wx:for="{{activeRows}}"
+      wx:key="id"
+      class="card active-card"
+      data-id="{{item.id}}"
+      bindtap="onGoRound"
+    >
+      <view class="flex aic jcb">
+        <view class="flex aic">
+          <text class="active-mode">{{item.modeName}}</text>
+          <text class="faint active-meta">{{item.playerCount}}人 · 已记{{item.roundCount}}轮</text>
+        </view>
+        <text class="faint">{{item.createdAtText}}</text>
+      </view>
+      <view class="flex aic jcb active-bottom">
+        <view class="flex aic">
+          <view class="avatar avatar-sm" style="background: {{item.leaderColor}}">{{item.leaderShort}}</view>
+          <text class="muted">领先</text>
+          <text class="active-name">{{item.leaderName}}</text>
+          <text class="active-total">{{item.leaderTotalText}}</text>
+        </view>
+        <view class="continue-tag">继续 ›</view>
+      </view>
+    </view>
+  </block>
+  <view wx:else class="empty">暂无进行中的对局，开一局吧</view>
+
+  <!-- 历史战绩入口 -->
+  <view class="history-entry flex aic jcb" bindtap="onGoHistory">
+    <text>历史战绩</text>
+    <text class="history-arrow">›</text>
+  </view>
+
+  <view class="page-foot">纯本地记录 · 数据仅存于本机</view>
+</view>

@@ -1,0 +1,137 @@
+/* pages/history/history.wxss —— 历史战绩样式 */
+
+.page {
+  padding: 0 32rpx 80rpx;
+}
+
+.history-head {
+  padding: 40rpx 8rpx 8rpx;
+}
+.history-title {
+  font-size: 56rpx;
+  font-weight: 800;
+  letter-spacing: 4rpx;
+}
+.history-sub {
+  margin-top: 8rpx;
+  font-size: var(--fs-1);
+  letter-spacing: 2rpx;
+}
+
+/* ---------- 归档卡片 ---------- */
+.his-card {
+  margin-top: 24rpx;
+  padding: 0;
+  overflow: hidden;
+}
+.his-head {
+  padding: 26rpx 28rpx;
+}
+.his-mode {
+  font-size: var(--fs-3);
+  font-weight: 700;
+  margin-right: 16rpx;
+}
+.his-meta {
+  font-size: var(--fs-1);
+  margin-right: 12rpx;
+}
+.expand-arrow {
+  color: var(--text-faint);
+  font-size: var(--fs-4);
+  transition: transform 0.2s ease;
+}
+.expand-on {
+  transform: rotate(180deg);
+}
+.his-mid {
+  margin-top: 20rpx;
+}
+.avatar-sm {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 14rpx;
+  font-size: var(--fs-1);
+  margin-right: 14rpx;
+}
+.his-winner {
+  margin-left: 12rpx;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ---------- 展开的回合流水 ---------- */
+.his-rounds {
+  border-top: 1rpx solid var(--line-soft);
+  padding: 20rpx 28rpx;
+  background: var(--bg-soft);
+}
+.his-round {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid var(--line-soft);
+}
+.his-round:last-child {
+  border-bottom: none;
+}
+.round-void {
+  opacity: 0.45;
+}
+.round-head {
+  margin-bottom: 10rpx;
+}
+.round-seq {
+  font-weight: 800;
+  color: var(--accent);
+  margin-right: 14rpx;
+  font-size: var(--fs-2);
+}
+.void-tag {
+  font-size: var(--fs-1);
+  color: var(--text-faint);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-full);
+  padding: 2rpx 14rpx;
+}
+.round-time {
+  font-size: var(--fs-1);
+}
+.round-cells {
+  gap: 10rpx 24rpx;
+}
+.dot {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 6rpx;
+  flex-shrink: 0;
+}
+.cell {
+  gap: 8rpx;
+  font-size: var(--fs-2);
+}
+.cell-name {
+  color: var(--text-dim);
+}
+.cell-delta {
+  font-weight: 700;
+}
+
+/* ---------- 操作按钮 ---------- */
+.his-actions {
+  gap: 20rpx;
+  border-top: 1rpx solid var(--line-soft);
+  padding: 20rpx 28rpx;
+}
+
+/* ---------- 空状态 ---------- */
+.his-empty {
+  margin-top: 120rpx;
+}
+.empty-icon {
+  font-size: 72rpx;
+  color: var(--text-faint);
+  margin-bottom: 20rpx;
+}
+.empty-sub {
+  margin-top: 10rpx;
+  font-size: var(--fs-1);
+}

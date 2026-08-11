@@ -1,0 +1,16 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/round/round",
+    "pages/history/history"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#12141a",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "落牌有声",
+    "backgroundColor": "#0c0e12",
+    "backgroundTextStyle": "dark"
+  },
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}

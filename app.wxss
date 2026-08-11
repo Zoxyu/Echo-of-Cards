@@ -1,0 +1,162 @@
+/* app.wxss —— 全局主题：深色现代风格
+   CSS 变量定义主色、8 色玩家色板、间距、圆角、字号，并提供 Flex/Grid 工具类 */
+
+page {
+  /* ---------- 基础色 ---------- */
+  --bg: #0c0e12;          /* 页面底色 */
+  --bg-soft: #12141a;     /* 次级背景 */
+  --bg-card: #191c24;     /* 卡片背景 */
+  --bg-deep: #0a0c0f;     /* 凹陷区域（键盘等） */
+  --line: #272c37;        /* 分割线/描边 */
+  --line-soft: #1f232d;
+
+  /* ---------- 文字 ---------- */
+  --text: #f2f3f5;
+  --text-dim: #98a0ae;
+  --text-faint: #5c6470;
+
+  /* ---------- 主色与语义色 ---------- */
+  --accent: #f5b942;      /* 主色：琥珀金 */
+  --accent-deep: #c98f1b;
+  --accent-ink: #1d1503;  /* 主色按钮上的文字 */
+  --good: #4cd97b;        /* 正分 */
+  --bad: #ff6b5e;         /* 负分 */
+
+  /* ---------- 8 色玩家色板 ---------- */
+  --pc0: #f5b942;
+  --pc1: #4cc3ff;
+  --pc2: #4cd97b;
+  --pc3: #ff6b5e;
+  --pc4: #b48cff;
+  --pc5: #ff9f43;
+  --pc6: #3ee0c8;
+  --pc7: #ff7ab8;
+
+  /* ---------- 间距 ---------- */
+  --sp-1: 8rpx;
+  --sp-2: 16rpx;
+  --sp-3: 24rpx;
+  --sp-4: 32rpx;
+  --sp-5: 48rpx;
+  --sp-6: 64rpx;
+
+  /* ---------- 圆角 ---------- */
+  --r-1: 12rpx;
+  --r-2: 20rpx;
+  --r-3: 32rpx;
+  --r-full: 999rpx;
+
+  /* ---------- 字号 ---------- */
+  --fs-1: 22rpx;
+  --fs-2: 26rpx;
+  --fs-3: 30rpx;
+  --fs-4: 36rpx;
+  --fs-5: 48rpx;
+  --fs-6: 64rpx;
+
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--fs-3);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+    "Helvetica Neue", "Microsoft YaHei", sans-serif;
+}
+
+/* ================= Flex 工具类 ================= */
+.flex      { display: flex; }
+.flex-col  { display: flex; flex-direction: column; }
+.aic       { align-items: center; }
+.ais       { align-items: flex-start; }
+.aie       { align-items: flex-end; }
+.jcc       { justify-content: center; }
+.jcb       { justify-content: space-between; }
+.jca       { justify-content: space-around; }
+.jce       { justify-content: flex-end; }
+.grow      { flex: 1; min-width: 0; }
+.wrap      { flex-wrap: wrap; }
+
+/* ================= Grid 工具类 ================= */
+.grid      { display: grid; }
+.g-2       { grid-template-columns: repeat(2, 1fr); }
+.g-3       { grid-template-columns: repeat(3, 1fr); }
+.g-4       { grid-template-columns: repeat(4, 1fr); }
+.gap-1     { gap: var(--sp-1); }
+.gap-2     { gap: var(--sp-2); }
+.gap-3     { gap: var(--sp-3); }
+
+/* ================= 常用组件基类 ================= */
+.card {
+  background: var(--bg-card);
+  border: 1rpx solid var(--line-soft);
+  border-radius: var(--r-2);
+  padding: var(--sp-4);
+}
+
+.muted  { color: var(--text-dim); }
+.faint  { color: var(--text-faint); }
+.pos    { color: var(--good); }
+.neg    { color: var(--bad); }
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-2);
+  padding: 24rpx 32rpx;
+  font-size: var(--fs-3);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.btn::after { border: none; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: var(--accent-ink);
+}
+.btn-ghost {
+  background: var(--bg-card);
+  border: 1rpx solid var(--line);
+  color: var(--text);
+}
+.btn-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* 区块标题 */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: var(--fs-2);
+  color: var(--text-dim);
+  letter-spacing: 4rpx;
+  margin: var(--sp-4) 0 var(--sp-3);
+}
+.section-title::before {
+  content: "";
+  width: 8rpx;
+  height: 24rpx;
+  border-radius: 4rpx;
+  background: var(--accent);
+}
+
+/* 头像色块 */
+.avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-2);
+  font-weight: 700;
+  color: #10131a;
+  flex-shrink: 0;
+}
+
+/* 空状态 */
+.empty {
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: var(--fs-2);
+}

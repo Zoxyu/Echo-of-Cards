@@ -1,0 +1,174 @@
+<!--pages/round/round.wxml —— 计分局核心页-->
+<view class="page">
+
+  <!-- 顶栏：模式标签 + 撤销 + 结束 -->
+  <view class="topbar flex aic jcb">
+    <view class="mode-tag">{{modeName}}</view>
+    <view class="flex aic topbar-actions">
+      <view class="chip-btn {{canUndo ? '' : 'chip-disabled'}}" bindtap="onUndo">撤销</view>
+      <view class="chip-btn chip-danger" bindtap="onFinish">结束对局</view>
+    </view>
+  </view>
+
+  <!-- 战况仪表盘：实时排名条 -->
+  <scroll-view wx:if="{{ranking.length}}" scroll-x class="rank-bar" enhanced show-scrollbar="{{false}}">
+    <view class="rank-inner">
+      <view
+        wx:for="{{ranking}}"
+        wx:key="playerId"
+        class="rank-item {{item.isBig ? 'rank-big' : ''}}"
+      >
+        <view class="avatar" style="background: {{item.color}}">{{item.short}}</view>
+        <view class="rank-name">{{item.name}}</view>
+        <view class="rank-total">{{item.totalText}}</view>
+        <view wx:if="{{item.isBig}}" class="big-badge">大赢家</view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- target 模式：目标分进度 -->
+  <view wx:if="{{targetInfo}}" class="card target-progress">
+    <view class="flex aic jcb">
+      <text class="muted">目标 {{targetInfo.target}} 分</text>
+      <text class="target-leader">领先 {{targetInfo.leaderName}} {{targetInfo.leaderTotal}} 分</text>
+    </view>
+    <view class="bar">
+      <view class="bar-fill" style="width: {{targetInfo.percent}}%"></view>
+    </view>
+  </view>
+
+  <!-- 输入区：按模式 fields 动态渲染 -->
+  <view class="card input-card">
+
+    <!-- 数值槽位 -->
+    <view class="slot-grid">
+      <view
+        wx:for="{{slots}}"
+        wx:key="label"
+        class="slot {{focusIndex === index ? 'slot-focus' : ''}}"
+        data-index="{{index}}"
+        bindtap="onSlotTap"
+      >
+        <view class="slot-label flex aic">
+          <view wx:if="{{item.color}}" class="dot" style="background: {{item.color}}"></view>
+          <text>{{item.label}}</text>
+        </view>
+        <view class="slot-value {{values[index] ? '' : 'slot-empty'}}">{{values[index] || '0'}}</view>
+      </view>
+
+      <!-- 零和局末位自动补全 -->
+      <view wx:if="{{autoSlot}}" class="slot slot-auto">
+        <view class="slot-label flex aic">
+          <view class="dot" style="background: {{autoSlot.color}}"></view>
+          <text>{{autoSlot.name}} · 自动补全</text>
+        </view>
+        <view class="slot-value">{{autoSlot.valueText || '—'}}</view>
+      </view>
+    </view>
+
+    <!-- 斗地主控件 -->
+    <block wx:if="{{inputKind === 'landlord'}}">
+      <view class="ctrl-title">选择地主</view>
+      <view class="flex wrap chip-row">
+        <view
+          wx:for="{{playerList}}"
+          wx:key="id"
+          class="pick-chip {{landlordIndex === index ? 'pick-on' : ''}}"
+          data-index="{{index}}"
+          bindtap="onPickLandlord"
+        >
+          <view class="dot" style="background: {{item.color}}"></view>
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+
+      <view class="ctrl-title">地主胜负</view>
+      <view class="seg flex">
+        <view class="seg-item {{landlordWin ? 'seg-on-win' : ''}}" data-win="win" bindtap="onSetWin">地主胜</view>
+        <view class="seg-item {{!landlordWin ? 'seg-on-lose' : ''}}" data-win="lose" bindtap="onSetWin">地主败</view>
+      </view>
+
+      <view class="ctrl-title">倍数事件 · 各 ×2 连乘</view>
+      <view class="flex wrap chip-row">
+        <view class="mul-chip {{bombOn ? 'mul-on' : ''}}" data-key="bombOn" bindtap="onToggleMul">炸弹 ×2</view>
+        <view class="mul-chip {{rocketOn ? 'mul-on' : ''}}" data-key="rocketOn" bindtap="onToggleMul">火箭 ×2</view>
+        <view class="mul-chip {{springOn ? 'mul-on' : ''}}" data-key="springOn" bindtap="onToggleMul">春天 ×2</view>
+      </view>
+    </block>
+
+    <!-- 自绘数字键盘 -->
+    <view class="keypad">
+      <view wx:for="{{keypadRows}}" wx:key="id" wx:for-item="row" class="key-row">
+        <view
+          wx:for="{{row.keys}}"
+          wx:for-item="key"
+          wx:key="k"
+          class="key {{key.wide ? 'key-wide' : ''}} {{key.k === 'sign' && !focusSigned ? 'key-off' : ''}} {{key.k === 'del' || key.k === 'clear' ? 'key-fn' : ''}}"
+          data-k="{{key.k}}"
+          bindtap="onKey"
+        >{{key.label}}</view>
+      </view>
+    </view>
+
+    <button class="btn btn-primary submit-btn" bindtap="onSubmit">记一轮</button>
+  </view>
+
+  <!-- 回合流水 -->
+  <view class="section-title">回合流水</view>
+  <block wx:if="{{hasRounds}}">
+    <view
+      wx:for="{{roundRows}}"
+      wx:key="id"
+      class="round-row {{item.voided ? 'round-void' : ''}}"
+      data-id="{{item.id}}"
+      bindlongpress="onRoundLongPress"
+    >
+      <view class="flex aic jcb round-head">
+        <view class="flex aic">
+          <text class="round-seq">#{{item.seq}}</text>
+          <text wx:if="{{item.voided}}" class="void-tag">已废弃</text>
+        </view>
+        <text class="faint">{{item.timeText}}</text>
+      </view>
+      <view class="flex wrap round-cells">
+        <view wx:for="{{item.cells}}" wx:for-item="cell" wx:key="name" class="cell flex aic">
+          <view class="dot" style="background: {{cell.color}}"></view>
+          <text class="cell-name">{{cell.name}}</text>
+          <text class="cell-delta {{cell.cls}}">{{cell.text}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="faint list-tip">长按任意回合可将其废弃</view>
+  </block>
+  <view wx:else class="empty">还没有回合，落下第一牌吧</view>
+
+  <!-- 终局结算面板 -->
+  <view wx:if="{{showSettle}}" class="mask">
+    <view class="settle-panel">
+      <view class="settle-kicker">GAME OVER</view>
+      <view class="settle-title">终局结算</view>
+      <view wx:if="{{finalWinnerName}}" class="settle-winner flex aic jcc">
+        <view class="avatar" style="background: {{finalWinnerColor}}">{{finalWinnerShort}}</view>
+        <view>
+          <view class="faint winner-label">大赢家</view>
+          <view class="winner-name">{{finalWinnerName}}</view>
+        </view>
+      </view>
+      <view class="settle-list">
+        <view wx:for="{{finalRanking}}" wx:key="playerId" class="settle-row flex aic jcb">
+          <view class="flex aic">
+            <text class="settle-rank">{{item.rank}}</text>
+            <view class="avatar avatar-sm" style="background: {{item.color}}">{{item.short}}</view>
+            <text>{{item.name}}</text>
+          </view>
+          <text class="settle-total">{{item.totalText}} 分</text>
+        </view>
+      </view>
+      <view class="flex settle-actions">
+        <button class="btn btn-ghost grow" bindtap="onSettleContinue">继续记录</button>
+        <button class="btn btn-primary grow" bindtap="onSettleArchive">归档战绩</button>
+      </view>
+    </view>
+  </view>
+
+</view>

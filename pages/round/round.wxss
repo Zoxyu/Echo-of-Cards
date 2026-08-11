@@ -1,0 +1,388 @@
+/* pages/round/round.wxss —— 计分局样式 */
+
+.page {
+  padding: 0 32rpx 80rpx;
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  padding: 24rpx 0;
+}
+.mode-tag {
+  font-size: var(--fs-2);
+  font-weight: 700;
+  color: var(--accent);
+  border: 1rpx solid var(--accent-deep);
+  border-radius: var(--r-full);
+  padding: 8rpx 28rpx;
+  letter-spacing: 2rpx;
+}
+.topbar-actions {
+  gap: 16rpx;
+}
+.chip-btn {
+  font-size: var(--fs-2);
+  color: var(--text-dim);
+  background: var(--bg-card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-full);
+  padding: 10rpx 28rpx;
+}
+.chip-danger {
+  color: var(--bad);
+  border-color: rgba(255, 107, 94, 0.4);
+}
+.chip-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ---------- 排名条 ---------- */
+.rank-bar {
+  margin: 8rpx 0 20rpx;
+  white-space: nowrap;
+}
+.rank-inner {
+  display: inline-flex;
+  gap: 16rpx;
+  padding: 4rpx;
+}
+.rank-item {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 150rpx;
+  background: var(--bg-card);
+  border: 1rpx solid var(--line-soft);
+  border-radius: var(--r-2);
+  padding: 20rpx 18rpx 16rpx;
+}
+.rank-item.rank-big {
+  border-color: var(--accent);
+  background: linear-gradient(170deg, rgba(245, 185, 66, 0.14), var(--bg-card));
+}
+.rank-name {
+  margin-top: 10rpx;
+  font-size: var(--fs-1);
+  color: var(--text-dim);
+  max-width: 140rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rank-total {
+  font-size: var(--fs-4);
+  font-weight: 800;
+}
+.big-badge {
+  position: absolute;
+  top: -16rpx;
+  right: -10rpx;
+  font-size: var(--fs-1);
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: var(--r-full);
+  padding: 2rpx 14rpx;
+  font-weight: 700;
+}
+
+/* ---------- 目标分进度 ---------- */
+.target-progress {
+  margin-bottom: 20rpx;
+}
+.target-leader {
+  font-size: var(--fs-2);
+  color: var(--accent);
+}
+.bar {
+  margin-top: 18rpx;
+  height: 12rpx;
+  border-radius: var(--r-full);
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent));
+  transition: width 0.3s ease;
+}
+
+/* ---------- 输入区 ---------- */
+.input-card {
+  margin-bottom: 8rpx;
+}
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+}
+.slot {
+  background: var(--bg-deep);
+  border: 2rpx solid var(--line-soft);
+  border-radius: var(--r-2);
+  padding: 18rpx 22rpx;
+}
+.slot-focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4rpx rgba(245, 185, 66, 0.12);
+}
+.slot-auto {
+  border-style: dashed;
+  border-color: var(--line);
+}
+.slot-label {
+  gap: 10rpx;
+  font-size: var(--fs-1);
+  color: var(--text-dim);
+}
+.slot-value {
+  margin-top: 8rpx;
+  font-size: var(--fs-5);
+  font-weight: 800;
+  letter-spacing: 2rpx;
+}
+.slot-empty {
+  color: var(--text-faint);
+}
+.dot {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 6rpx;
+  flex-shrink: 0;
+}
+
+/* ---------- 斗地主控件 ---------- */
+.ctrl-title {
+  margin: 28rpx 0 14rpx;
+  font-size: var(--fs-2);
+  color: var(--text-dim);
+  letter-spacing: 2rpx;
+}
+.chip-row {
+  gap: 16rpx;
+}
+.pick-chip {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: var(--fs-2);
+  background: var(--bg-deep);
+  border: 2rpx solid var(--line-soft);
+  border-radius: var(--r-full);
+  padding: 12rpx 26rpx;
+}
+.pick-on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(245, 185, 66, 0.1);
+}
+.seg {
+  border-radius: var(--r-2);
+  overflow: hidden;
+  border: 1rpx solid var(--line);
+}
+.seg-item {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  font-size: var(--fs-2);
+  color: var(--text-dim);
+  background: var(--bg-deep);
+}
+.seg-on-win {
+  background: rgba(255, 107, 94, 0.18);
+  color: var(--bad);
+  font-weight: 700;
+}
+.seg-on-lose {
+  background: rgba(76, 217, 123, 0.16);
+  color: var(--good);
+  font-weight: 700;
+}
+.mul-chip {
+  font-size: var(--fs-2);
+  background: var(--bg-deep);
+  border: 2rpx solid var(--line-soft);
+  border-radius: var(--r-full);
+  padding: 12rpx 28rpx;
+  color: var(--text-dim);
+}
+.mul-on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(245, 185, 66, 0.1);
+  font-weight: 700;
+}
+
+/* ---------- 自绘键盘 ---------- */
+.keypad {
+  margin-top: 32rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+.key-row {
+  display: flex;
+  gap: 12rpx;
+}
+.key {
+  flex: 1;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-soft);
+  border: 1rpx solid var(--line-soft);
+  border-radius: var(--r-1);
+  font-size: var(--fs-4);
+  font-weight: 700;
+}
+.key:active {
+  background: var(--line);
+}
+.key-wide {
+  flex: 3;
+  background: rgba(245, 185, 66, 0.12);
+  color: var(--accent);
+  font-size: var(--fs-3);
+}
+.key-fn {
+  font-size: var(--fs-3);
+  color: var(--text-dim);
+}
+.key-off {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.submit-btn {
+  margin-top: 24rpx;
+  font-size: var(--fs-4);
+  letter-spacing: 6rpx;
+}
+
+/* ---------- 回合流水 ---------- */
+.round-row {
+  background: var(--bg-card);
+  border: 1rpx solid var(--line-soft);
+  border-radius: var(--r-2);
+  padding: 20rpx 24rpx;
+  margin-bottom: 16rpx;
+}
+.round-void {
+  opacity: 0.45;
+}
+.round-head {
+  margin-bottom: 14rpx;
+}
+.round-seq {
+  font-weight: 800;
+  color: var(--accent);
+  margin-right: 14rpx;
+}
+.void-tag {
+  font-size: var(--fs-1);
+  color: var(--text-faint);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-full);
+  padding: 2rpx 14rpx;
+}
+.round-cells {
+  gap: 12rpx 24rpx;
+}
+.cell {
+  gap: 8rpx;
+  font-size: var(--fs-2);
+}
+.cell-name {
+  color: var(--text-dim);
+}
+.cell-delta {
+  font-weight: 700;
+}
+.list-tip {
+  text-align: center;
+  font-size: var(--fs-1);
+  margin-top: 8rpx;
+}
+
+/* ---------- 终局结算面板 ---------- */
+.mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(5, 7, 10, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+  padding: 48rpx;
+}
+.settle-panel {
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--bg-soft);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-3);
+  padding: 48rpx 40rpx;
+}
+.settle-kicker {
+  text-align: center;
+  font-size: var(--fs-1);
+  letter-spacing: 10rpx;
+  color: var(--accent);
+}
+.settle-title {
+  text-align: center;
+  font-size: var(--fs-5);
+  font-weight: 800;
+  margin-top: 8rpx;
+}
+.settle-winner {
+  gap: 20rpx;
+  margin: 36rpx 0;
+  padding: 24rpx;
+  border-radius: var(--r-2);
+  background: rgba(245, 185, 66, 0.08);
+  border: 1rpx solid rgba(245, 185, 66, 0.3);
+}
+.winner-label {
+  font-size: var(--fs-1);
+  letter-spacing: 4rpx;
+}
+.winner-name {
+  font-size: var(--fs-4);
+  font-weight: 800;
+  color: var(--accent);
+}
+.settle-list {
+  margin-bottom: 32rpx;
+}
+.settle-row {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid var(--line-soft);
+}
+.settle-rank {
+  width: 48rpx;
+  font-weight: 800;
+  color: var(--text-faint);
+}
+.avatar-sm {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 14rpx;
+  font-size: var(--fs-1);
+  margin-right: 14rpx;
+}
+.settle-total {
+  font-weight: 800;
+  font-size: var(--fs-3);
+}
+.settle-actions {
+  gap: 20rpx;
+}

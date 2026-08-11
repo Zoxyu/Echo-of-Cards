@@ -1,0 +1,74 @@
+<!--pages/history/history.wxml —— 历史战绩：归档对局列表，点击展开回合流水-->
+<view class="page">
+
+  <view class="history-head">
+    <view class="history-title">历史战绩</view>
+    <view class="faint history-sub">归档对局 · 按结束时间倒序</view>
+  </view>
+
+  <block wx:if="{{hasRows}}">
+    <view wx:for="{{rows}}" wx:key="id" class="card his-card">
+
+      <!-- 卡片头：点击展开/收起 -->
+      <view class="his-head" data-index="{{index}}" bindtap="onToggle">
+        <view class="flex aic jcb">
+          <view class="flex aic">
+            <text class="his-mode">{{item.modeName}}</text>
+            <text class="faint his-meta">{{item.playerCount}}人 · {{item.roundCount}}轮</text>
+            <text wx:if="{{item.targetText}}" class="faint his-meta">{{item.targetText}}</text>
+          </view>
+          <text class="expand-arrow {{item.expanded ? 'expand-on' : ''}}">⌄</text>
+        </view>
+        <view class="flex aic jcb his-mid">
+          <view class="flex aic">
+            <view class="avatar avatar-sm" style="background: {{item.winnerColor}}">{{item.winnerShort}}</view>
+            <text class="muted">大赢家</text>
+            <text class="his-winner">{{item.winnerName}}</text>
+          </view>
+          <text class="faint">{{item.endedAtText}}</text>
+        </view>
+      </view>
+
+      <!-- 展开：全量回合流水 -->
+      <block wx:if="{{item.expanded}}">
+        <view class="his-rounds">
+          <view wx:if="{{item.roundRows.length === 0}}" class="empty">该局未记录回合</view>
+          <view
+            wx:for="{{item.roundRows}}"
+            wx:for-item="rd"
+            wx:key="id"
+            class="his-round {{rd.voided ? 'round-void' : ''}}"
+          >
+            <view class="flex aic jcb round-head">
+              <view class="flex aic">
+                <text class="round-seq">#{{rd.seq}}</text>
+                <text wx:if="{{rd.voided}}" class="void-tag">已废弃</text>
+              </view>
+              <text class="faint round-time">{{rd.timeText}}</text>
+            </view>
+            <view class="flex wrap round-cells">
+              <view wx:for="{{rd.cells}}" wx:for-item="cell" wx:key="name" class="cell flex aic">
+                <view class="dot" style="background: {{cell.color}}"></view>
+                <text class="cell-name">{{cell.name}}</text>
+                <text class="cell-delta {{cell.cls}}">{{cell.text}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 操作按钮 -->
+      <view class="flex his-actions">
+        <button class="btn btn-ghost grow" data-id="{{item.id}}" catchtap="onDelete">删除</button>
+        <button class="btn btn-primary grow" data-id="{{item.id}}" catchtap="onReplay">再来一局</button>
+      </view>
+    </view>
+  </block>
+
+  <view wx:else class="empty his-empty">
+    <view class="empty-icon">☰</view>
+    <view>暂无归档战绩</view>
+    <view class="faint empty-sub">结束一局对局后会归档到这里</view>
+  </view>
+
+</view>
