@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "计分局"
+  "navigationBarTitleText": "计分局",
+  "usingComponents": {
+    "custom-nav": "/components/custom-nav/custom-nav"
+  }
 }

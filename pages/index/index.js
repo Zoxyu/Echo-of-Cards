@@ -2,6 +2,7 @@
 // 页面 JS 不做任何分数计算：收集输入 → 调引擎 → setData
 var engine = require('../../utils/scoreEngine');
 var storageKit = require('../../utils/storageKit');
+var feedback = require('../../utils/feedbackKit');
 
 // 8 色玩家色板（与 app.wxss 的 --pc0~--pc7 保持一致）
 var COLORS = ['#f5b942', '#4cc3ff', '#4cd97b', '#ff6b5e', '#b48cff', '#ff9f43', '#3ee0c8', '#ff7ab8'];
@@ -30,23 +31,30 @@ Page({
   data: {
     modes: [],             // 模式卡片数据（由 listModes 驱动）
     selectedModeId: 'free',
-    isTargetMode: false,   // target 模式选中后显示目标分输入
+    isTargetMode: false,   // 选中模式的 hasTargetScore 为 true 时显示目标分输入
     targetScore: '500',
     counts: [2, 3, 4, 5, 6, 7, 8],
     playerCount: 4,
-    countDisabled: false,  // 斗地主固定 3 人时禁用人数选择
+    countDisabled: false,  // 固定人数模式（斗地主 3 人/掼蛋 4 人）时禁用人数选择
     players: [],           // [{id,name,short,color}]
+    strictZeroSum: true,   // 分数平衡校验开关（默认开启，传入 createGame options）
     activeRows: [],        // 进行中对局展示数据（JS 预计算）
-    hasActive: false
+    hasActive: false,
+    navPad: 0              // 自定义导航避让高度 px（来自 globalData.nav）
   },
 
   onLoad: function () {
+    // 自定义导航避让高度：读入 globalData.nav.navPad
+    var nav = (getApp().globalData && getApp().globalData.nav) || {};
+    this.setData({ navPad: nav.navPad || 64 });
     // 模式卡片数据驱动渲染
     var modes = engine.listModes().map(function (m) {
       return {
         id: m.id,
         name: m.name,
         desc: m.desc,
+        hasTargetScore: !!m.hasTargetScore,
+        defaultTarget: m.defaultTarget || 500,
         countText: m.playerCount[0] === m.playerCount[1]
           ? '固定 ' + m.playerCount[0] + ' 人'
           : m.playerCount[0] + '~' + m.playerCount[1] + ' 人'
@@ -85,12 +93,17 @@ Page({
 
   onSelectMode: function (e) {
     var id = e.currentTarget.dataset.id;
-    var isLandlord = id === 'landlord';
-    var n = isLandlord ? 3 : this.data.playerCount;
+    var mode = engine.getMode(id);
+    if (!mode) return;
+    // 固定人数模式（人数上下限相等，如斗地主 3 人、掼蛋 4 人）禁用人数选择
+    var isFixed = mode.playerCount[0] === mode.playerCount[1];
+    var n = isFixed ? mode.playerCount[0] : this.data.playerCount;
     this.setData({
       selectedModeId: id,
-      isTargetMode: id === 'target',
-      countDisabled: isLandlord,
+      // 目标分输入显示条件：读模式注册表 hasTargetScore
+      isTargetMode: !!mode.hasTargetScore,
+      targetScore: String(mode.defaultTarget || 500),
+      countDisabled: isFixed,
       playerCount: n,
       players: this.buildPlayers(n, this.data.players)
     });
@@ -128,6 +141,11 @@ Page({
     this.setData({ targetScore: e.detail.value });
   },
 
+  // 分数平衡校验开关（默认开启）
+  onStrictChange: function (e) {
+    this.setData({ strictZeroSum: !!e.detail.value });
+  },
+
   // ---------- 开局 ----------
 
   onStartGame: function () {
@@ -144,9 +162,12 @@ Page({
       return { id: p.id, name: name, color: p.color };
     });
     var options = {};
-    if (this.data.selectedModeId === 'target') {
-      options.targetScore = Number(this.data.targetScore) || 500;
+    // 目标分传入条件：读模式注册表 hasTargetScore（覆盖 target/guandan/uno）
+    if (mode.hasTargetScore) {
+      options.targetScore = Number(this.data.targetScore) || mode.defaultTarget || 500;
     }
+    // 零和严格校验：由开局面板开关传入（默认开）
+    options.strictZeroSum = this.data.strictZeroSum !== false;
     var game = engine.createGame(mode.id, cleanPlayers, options);
     var root = storageKit.loadData();
     root.active.push(game);
@@ -154,6 +175,7 @@ Page({
       wx.showToast({ title: '保存失败，请重试', icon: 'none' });
       return;
     }
+    feedback.impact(); // 开局成功重反馈
     wx.navigateTo({ url: '/pages/round/round?id=' + game.id });
   },
 
@@ -166,6 +188,8 @@ Page({
       var mode = engine.getMode(g.modeId);
       var ranking = engine.computeRanking(g);
       var leader = ranking.length ? ranking[0] : null;
+      // 领先者文案按模式方向派生：asc → "领先(分低者优)"，WXML 只绑变量
+      var asc = !!(mode && mode.ascending);
       return {
         id: g.id,
         createdAt: g.createdAt,
@@ -173,6 +197,7 @@ Page({
         modeName: mode ? mode.name : '未知模式',
         playerCount: g.players.length,
         roundCount: g.rounds.length,
+        leaderLabel: asc ? '领先(分低者优)' : '领先',
         leaderName: leader ? leader.name : '暂无',
         leaderShort: leader ? leader.name.charAt(0) : '—',
         leaderColor: leader ? leader.color : '#5c6470',

@@ -1,10 +1,10 @@
 <!--pages/index/index.wxml —— 首页：上半部分开局配置，下半部分进行中对局-->
-<view class="page">
+<custom-nav title="落牌有声" />
+<view class="page" style="padding-top: {{navPad}}px;">
 
-  <!-- 品牌区 -->
+  <!-- 品牌区（大标题已并入自定义导航，保留副标语） -->
   <view class="hero">
     <view class="hero-badge">ECHO OF CARDS</view>
-    <view class="hero-title">落牌有声</view>
     <view class="hero-sub">牌桌积分 · 即落即记</view>
   </view>
 
@@ -16,6 +16,8 @@
       wx:key="id"
       class="mode-card {{selectedModeId === item.id ? 'mode-on' : ''}}"
       data-id="{{item.id}}"
+      hover-class="press-hover"
+      hover-stay-time="80"
       bindtap="onSelectMode"
     >
       <view class="flex jcb aic">
@@ -49,6 +51,8 @@
       wx:key="*this"
       class="count-cell {{playerCount === item ? 'count-on' : ''}} {{countDisabled ? 'count-disabled' : ''}}"
       data-n="{{item}}"
+      hover-class="press-hover"
+      hover-stay-time="80"
       bindtap="onSelectCount"
     >{{item}}人</view>
   </view>
@@ -76,8 +80,17 @@
     </view>
   </view>
 
+  <!-- 分数平衡校验开关（默认开启，传入 createGame options.strictZeroSum） -->
+  <view class="card strict-card flex aic jcb">
+    <view>
+      <view class="strict-label">分数平衡校验</view>
+      <view class="faint strict-hint">每轮全场输赢合计必须为 0</view>
+    </view>
+    <switch checked="{{strictZeroSum}}" bindchange="onStrictChange" color="#f5b942" />
+  </view>
+
   <!-- 开始对局 -->
-  <button class="btn btn-primary start-btn" bindtap="onStartGame">开始对局</button>
+  <button class="btn btn-primary start-btn" hover-class="press-hover" hover-stay-time="80" bindtap="onStartGame">开始对局</button>
 
   <!-- 进行中对局 -->
   <view class="section-title">进行中对局</view>
@@ -87,6 +100,8 @@
       wx:key="id"
       class="card active-card"
       data-id="{{item.id}}"
+      hover-class="press-hover"
+      hover-stay-time="80"
       bindtap="onGoRound"
     >
       <view class="flex aic jcb">
@@ -99,7 +114,7 @@
       <view class="flex aic jcb active-bottom">
         <view class="flex aic">
           <view class="avatar avatar-sm" style="background: {{item.leaderColor}}">{{item.leaderShort}}</view>
-          <text class="muted">领先</text>
+          <text class="muted">{{item.leaderLabel}}</text>
           <text class="active-name">{{item.leaderName}}</text>
           <text class="active-total">{{item.leaderTotalText}}</text>
         </view>
@@ -110,7 +125,7 @@
   <view wx:else class="empty">暂无进行中的对局，开一局吧</view>
 
   <!-- 历史战绩入口 -->
-  <view class="history-entry flex aic jcb" bindtap="onGoHistory">
+  <view class="history-entry flex aic jcb" hover-class="press-hover" hover-stay-time="80" bindtap="onGoHistory">
     <text>历史战绩</text>
     <text class="history-arrow">›</text>
   </view>

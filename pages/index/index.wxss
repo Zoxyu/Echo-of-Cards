@@ -18,14 +18,7 @@
   padding: 6rpx 20rpx;
   margin-bottom: 20rpx;
 }
-.hero-title {
-  font-size: 72rpx;
-  font-weight: 800;
-  letter-spacing: 6rpx;
-  line-height: 1.1;
-}
 .hero-sub {
-  margin-top: 12rpx;
   color: var(--text-dim);
   font-size: var(--fs-2);
   letter-spacing: 4rpx;
@@ -46,8 +39,8 @@
 }
 .mode-card.mode-on {
   border-color: var(--accent);
-  background: linear-gradient(160deg, rgba(245, 185, 66, 0.16), rgba(245, 185, 66, 0.04));
-  box-shadow: 0 8rpx 32rpx rgba(245, 185, 66, 0.12);
+  background: linear-gradient(160deg, var(--accent-tint-strong), var(--accent-tint));
+  box-shadow: 0 8rpx 32rpx var(--accent-tint);
 }
 .mode-name {
   font-size: var(--fs-3);
@@ -138,6 +131,18 @@
   font-size: var(--fs-1);
 }
 
+/* ---------- 分数平衡校验开关 ---------- */
+.strict-card {
+  margin-top: 24rpx;
+}
+.strict-label {
+  font-weight: 700;
+}
+.strict-hint {
+  font-size: var(--fs-1);
+  margin-top: 6rpx;
+}
+
 /* ---------- 开始按钮 ---------- */
 .start-btn {
   margin-top: var(--sp-5);
@@ -182,7 +187,7 @@
 .continue-tag {
   font-size: var(--fs-2);
   color: var(--accent);
-  background: rgba(245, 185, 66, 0.12);
+  background: var(--accent-tint);
   border-radius: var(--r-full);
   padding: 8rpx 24rpx;
 }

@@ -5,12 +5,15 @@
     "pages/history/history"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#12141a",
-    "navigationBarTextStyle": "white",
+    "navigationStyle": "custom",
+    "navigationBarBackgroundColor": "@navBgColor",
+    "navigationBarTextStyle": "@navTxtStyle",
     "navigationBarTitleText": "落牌有声",
-    "backgroundColor": "#0c0e12",
-    "backgroundTextStyle": "dark"
+    "backgroundColor": "@bgColor",
+    "backgroundTextStyle": "@bgTxtStyle"
   },
+  "darkmode": true,
+  "themeLocation": "theme.json",
   "lazyCodeLoading": "requiredComponents",
   "sitemapLocation": "sitemap.json"
 }

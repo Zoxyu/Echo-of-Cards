@@ -1,28 +1,35 @@
-/* app.wxss —— 全局主题：深色现代风格
+/* app.wxss —— 全局主题：日夜双主题（纯 CSS 方案，零 JS 状态）
+   page{} 内为浅色基线（默认），深色经 @media (prefers-color-scheme: dark) 全覆盖；
    CSS 变量定义主色、8 色玩家色板、间距、圆角、字号，并提供 Flex/Grid 工具类 */
 
 page {
-  /* ---------- 基础色 ---------- */
-  --bg: #0c0e12;          /* 页面底色 */
-  --bg-soft: #12141a;     /* 次级背景 */
-  --bg-card: #191c24;     /* 卡片背景 */
-  --bg-deep: #0a0c0f;     /* 凹陷区域（键盘等） */
-  --line: #272c37;        /* 分割线/描边 */
-  --line-soft: #1f232d;
+  /* ---------- 基础色（浅色基线） ---------- */
+  --bg: #f4f5f7;          /* 页面底色 */
+  --bg-soft: #eceef2;     /* 次级背景 */
+  --bg-card: #ffffff;     /* 卡片背景 */
+  --bg-deep: #e9ebf0;     /* 凹陷区域（键盘等） */
+  --line: #d7dae1;        /* 分割线/描边 */
+  --line-soft: #e4e7ec;
 
   /* ---------- 文字 ---------- */
-  --text: #f2f3f5;
-  --text-dim: #98a0ae;
-  --text-faint: #5c6470;
+  --text: #1c1f26;
+  --text-dim: #6a7280;
+  --text-faint: #9aa2ae;
 
   /* ---------- 主色与语义色 ---------- */
   --accent: #f5b942;      /* 主色：琥珀金 */
   --accent-deep: #c98f1b;
   --accent-ink: #1d1503;  /* 主色按钮上的文字 */
-  --good: #4cd97b;        /* 正分 */
-  --bad: #ff6b5e;         /* 负分 */
+  --good: #1a8f47;        /* 正分 */
+  --bad: #d93a2f;         /* 负分 */
 
-  /* ---------- 8 色玩家色板 ---------- */
+  /* ---------- 新增语义变量 ---------- */
+  --avatar-ink: #10131a;                    /* 头像色块上的文字 */
+  --mask-bg: rgba(28, 31, 38, 0.55);        /* 全屏遮罩 */
+  --accent-tint: rgba(201, 143, 27, 0.08);  /* 主色淡铺底（白底可读） */
+  --accent-tint-strong: rgba(201, 143, 27, 0.20); /* 主色高亮/描边/投影 */
+
+  /* ---------- 8 色玩家色板（中明度，两态通用） ---------- */
   --pc0: #f5b942;
   --pc1: #4cc3ff;
   --pc2: #4cd97b;
@@ -59,6 +66,69 @@ page {
   font-size: var(--fs-3);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
     "Helvetica Neue", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------- 深色主题：系统深色时整体覆盖（原深色值原样保留） ---------- */
+@media (prefers-color-scheme: dark) {
+  page {
+    /* ---------- 基础色 ---------- */
+    --bg: #0c0e12;          /* 页面底色 */
+    --bg-soft: #12141a;     /* 次级背景 */
+    --bg-card: #191c24;     /* 卡片背景 */
+    --bg-deep: #0a0c0f;     /* 凹陷区域（键盘等） */
+    --line: #272c37;        /* 分割线/描边 */
+    --line-soft: #1f232d;
+
+    /* ---------- 文字 ---------- */
+    --text: #f2f3f5;
+    --text-dim: #98a0ae;
+    --text-faint: #5c6470;
+
+    /* ---------- 主色与语义色 ---------- */
+    --accent: #f5b942;      /* 主色：琥珀金 */
+    --accent-deep: #c98f1b;
+    --accent-ink: #1d1503;  /* 主色按钮上的文字 */
+    --good: #4cd97b;        /* 正分 */
+    --bad: #ff6b5e;         /* 负分 */
+
+    /* ---------- 新增语义变量 ---------- */
+    --avatar-ink: #10131a;                     /* 头像色块上的文字 */
+    --mask-bg: rgba(5, 7, 10, 0.78);           /* 全屏遮罩 */
+    --accent-tint: rgba(245, 185, 66, 0.10);   /* 主色淡铺底 */
+    --accent-tint-strong: rgba(245, 185, 66, 0.28); /* 主色高亮/描边/投影 */
+
+    /* ---------- 8 色玩家色板 ---------- */
+    --pc0: #f5b942;
+    --pc1: #4cc3ff;
+    --pc2: #4cd97b;
+    --pc3: #ff6b5e;
+    --pc4: #b48cff;
+    --pc5: #ff9f43;
+    --pc6: #3ee0c8;
+    --pc7: #ff7ab8;
+
+    /* ---------- 间距 ---------- */
+    --sp-1: 8rpx;
+    --sp-2: 16rpx;
+    --sp-3: 24rpx;
+    --sp-4: 32rpx;
+    --sp-5: 48rpx;
+    --sp-6: 64rpx;
+
+    /* ---------- 圆角 ---------- */
+    --r-1: 12rpx;
+    --r-2: 20rpx;
+    --r-3: 32rpx;
+    --r-full: 999rpx;
+
+    /* ---------- 字号 ---------- */
+    --fs-1: 22rpx;
+    --fs-2: 26rpx;
+    --fs-3: 30rpx;
+    --fs-4: 36rpx;
+    --fs-5: 48rpx;
+    --fs-6: 64rpx;
+  }
 }
 
 /* ================= Flex 工具类 ================= */
@@ -149,8 +219,14 @@ page {
   justify-content: center;
   font-size: var(--fs-2);
   font-weight: 700;
-  color: #10131a;
+  color: var(--avatar-ink);
   flex-shrink: 0;
+}
+
+/* 按压缩放反馈（hover-class 通用类，配合 hover-stay-time="80" 使用） */
+.press-hover {
+  transform: scale(0.96);
+  opacity: 0.9;
 }
 
 /* 空状态 */

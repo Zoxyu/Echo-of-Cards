@@ -58,7 +58,11 @@ function checkBalance(deltas) {
 
 // ================= MODES 注册表 =================
 // 每个模式为声明式对象：
-// { id, name, desc, playerCount:[min,max], isZeroSum, fields:[输入字段定义],
+// { id, name, desc, playerCount:[min,max], isZeroSum,
+//   ascending?,        可选，true 表示低分获胜（缺省视为 false）
+//   hasTargetScore?,   可选，需要开局配置目标分
+//   defaultTarget?,    可选，目标分默认值
+//   fields:[输入字段定义],
 //   validate(inputs, game) -> 错误信息 | null,
 //   settle(inputs, game)   -> { playerId: delta },
 //   isOver(game)           -> bool }
@@ -256,6 +260,8 @@ var MODES = {
     desc: '通用累分，有人总分达到目标分即终局',
     playerCount: [2, 8],
     isZeroSum: false,
+    hasTargetScore: true,
+    defaultTarget: 500,
     fields: [
       { key: 'scores', label: '本轮积分', type: 'perPlayerSigned', hint: '累分至目标分即终局' }
     ],
@@ -287,8 +293,89 @@ var MODES = {
   }
 };
 
-// 模式展示顺序（驱动 UI 渲染）
-var MODE_ORDER = ['free', 'zeroSum', 'landlord', 'paodekuai', 'target'];
+// ---------- 目标类模式方向感知终局判定（供新增目标类模式复用） ----------
+// desc 方向（默认）：有人总分 >= 目标分终局；
+// asc 方向（罚分类）：有人罚分累计达到上限（>= targetScore）终局，最低分获胜
+function targetStyleIsOver(game) {
+  var mode = getMode(game.modeId);
+  var t = game.targetScore || (mode && mode.defaultTarget) || 500;
+  var totals = computeTotals(game);
+  for (var i = 0; i < game.players.length; i++) {
+    var total = totals[game.players[i].id] || 0;
+    if (total >= t) return true;
+  }
+  return false;
+}
+
+// ---------- 6. guandan 掼蛋·攒分升级 ----------
+// fields/validate/settle 直接复用 target 同款函数引用
+MODES.guandan = {
+  id: 'guandan',
+  name: '掼蛋·攒分升级',
+  desc: '2v2 组队场景按人录入，队伍合计可并入同队一人；先达目标分终局',
+  playerCount: [4, 4],
+  isZeroSum: false,
+  ascending: false,
+  hasTargetScore: true,
+  defaultTarget: 1000,
+  fields: MODES.target.fields,
+  validate: MODES.target.validate,
+  settle: MODES.target.settle,
+  isOver: targetStyleIsOver
+};
+
+// ---------- 7. uno UNO·派对罚分 ----------
+// ascending：低分获胜；罚分达上限（defaultTarget）终局
+MODES.uno = {
+  id: 'uno',
+  name: 'UNO·派对罚分',
+  desc: '罚分累计，达到上限即终局，最低分获胜',
+  playerCount: [2, 8],
+  isZeroSum: false,
+  ascending: true,
+  hasTargetScore: true,
+  defaultTarget: 500,
+  fields: [
+    { key: 'scores', label: '本轮罚分', type: 'perPlayerSigned', hint: '逐位录入本轮新增罚分，不可为负' }
+  ],
+  // 在通用逐人校验基础上额外限制罚分非负
+  validate: function (inputs, game) {
+    var scores = (inputs && inputs.scores) || {};
+    for (var i = 0; i < game.players.length; i++) {
+      var p = game.players[i];
+      var v = scores[p.id];
+      if (!isValidNumber(v)) {
+        return '请填写「' + p.name + '」的本轮罚分';
+      }
+      if (Number(v) < 0) {
+        return '「' + p.name + '」的罚分不能为负';
+      }
+    }
+    return null;
+  },
+  settle: MODES.target.settle,
+  isOver: targetStyleIsOver
+};
+
+// ---------- 8. texas 德州扑克记分 ----------
+// fields/validate/settle 直接复用 zeroSum 函数引用（末位自动补全，页面提交时 checkBalance 断言）
+// 文案口径：仅使用"每手积分变化/积分"
+MODES.texas = {
+  id: 'texas',
+  name: '德州扑克记分',
+  desc: '录入前 N-1 人每手积分变化，末位自动补全，总和恒为 0',
+  playerCount: [2, 9],
+  isZeroSum: true,
+  fields: MODES.zeroSum.fields,
+  validate: MODES.zeroSum.validate,
+  settle: MODES.zeroSum.settle,
+  isOver: function () {
+    return false;
+  }
+};
+
+// 模式展示顺序（驱动 UI 渲染）：既有顺序不变，末尾追加新模式
+var MODE_ORDER = ['free', 'zeroSum', 'landlord', 'paodekuai', 'target', 'guandan', 'uno', 'texas'];
 
 function getMode(id) {
   return MODES[id] || null;
@@ -301,7 +388,8 @@ function listModes() {
 // ================= 引擎操作（全部不可变） =================
 
 // createGame(modeId, players, options) -> Game
-// players: [{id,name,color}]；options: { targetScore }
+// players: [{id,name,color}]；options: { targetScore, strictZeroSum }
+// strictZeroSum 未传时落库字段值为 true（默认开启零和校验）
 function createGame(modeId, players, options) {
   var mode = getMode(modeId);
   if (!mode) throw new Error('未知模式：' + modeId);
@@ -321,7 +409,12 @@ function createGame(modeId, players, options) {
     game.targetScore = Number(options.targetScore) || 500;
   } else if (modeId === 'target') {
     game.targetScore = 500; // 默认目标分
+  } else if (mode.hasTargetScore) {
+    // 其余目标类模式（guandan/uno）未传时取模式默认目标分
+    game.targetScore = mode.defaultTarget || 500;
   }
+  // 零和严格校验开关：未传默认开启，后续任务提供 UI 开关
+  game.strictZeroSum = (options.strictZeroSum === undefined) ? true : !!options.strictZeroSum;
   return game;
 }
 
@@ -386,8 +479,11 @@ function computeTotals(game) {
 }
 
 // computeRanking(game) -> [{ playerId, name, color, total, rank }]
-// 总分降序；并列同分取相同名次（下一名次跳过，如 1,2,2,4）
+// 默认（desc）总分降序；ascending 模式升序（低分在前）
+// 并列同分取相同名次（下一名次跳过，如 1,2,2,4）
 function computeRanking(game) {
+  var mode = getMode(game.modeId);
+  var asc = !!(mode && mode.ascending);
   var totals = computeTotals(game);
   var arr = game.players.map(function (p) {
     return {
@@ -397,7 +493,9 @@ function computeRanking(game) {
       total: totals[p.id] || 0
     };
   });
-  arr.sort(function (a, b) { return b.total - a.total; });
+  arr.sort(asc
+    ? function (a, b) { return a.total - b.total; }
+    : function (a, b) { return b.total - a.total; });
   var rank = 0;
   var prev = null;
   arr.forEach(function (item, idx) {
@@ -411,16 +509,19 @@ function computeRanking(game) {
 }
 
 // computeBigWinner(game) -> 大赢家 playerId；无回合或全员总分为 0 时返回 null
+// 默认（desc）取最高分者；ascending 模式取最低分者
 function computeBigWinner(game) {
   if (!game.rounds || game.rounds.length === 0) return null;
+  var mode = getMode(game.modeId);
+  var asc = !!(mode && mode.ascending);
   var totals = computeTotals(game);
   var bestId = null;
-  var best = -Infinity;
+  var best = asc ? Infinity : -Infinity;
   var allZero = true;
   game.players.forEach(function (p) {
     var t = totals[p.id] || 0;
     if (t !== 0) allZero = false;
-    if (t > best) {
+    if (asc ? (t < best) : (t > best)) {
       best = t;
       bestId = p.id;
     }

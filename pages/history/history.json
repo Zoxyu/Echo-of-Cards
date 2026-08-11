@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "历史战绩"
+  "navigationBarTitleText": "历史战绩",
+  "usingComponents": {
+    "custom-nav": "/components/custom-nav/custom-nav"
+  }
 }

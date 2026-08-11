@@ -5,15 +5,9 @@
 }
 
 .history-head {
-  padding: 40rpx 8rpx 8rpx;
-}
-.history-title {
-  font-size: 56rpx;
-  font-weight: 800;
-  letter-spacing: 4rpx;
+  padding: 24rpx 8rpx 8rpx;
 }
 .history-sub {
-  margin-top: 8rpx;
   font-size: var(--fs-1);
   letter-spacing: 2rpx;
 }

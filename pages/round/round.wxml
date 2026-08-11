@@ -1,12 +1,14 @@
 <!--pages/round/round.wxml —— 计分局核心页-->
-<view class="page">
+<custom-nav title="计分局" back="true" />
+<view class="page" style="padding-top: {{navPad}}px;">
 
   <!-- 顶栏：模式标签 + 撤销 + 结束 -->
   <view class="topbar flex aic jcb">
     <view class="mode-tag">{{modeName}}</view>
     <view class="flex aic topbar-actions">
-      <view class="chip-btn {{canUndo ? '' : 'chip-disabled'}}" bindtap="onUndo">撤销</view>
-      <view class="chip-btn chip-danger" bindtap="onFinish">结束对局</view>
+      <view class="chip-btn {{strictOn ? 'chip-strict-on' : ''}} {{strictFixed ? 'chip-fixed' : ''}}" hover-class="press-hover" hover-stay-time="80" bindtap="onToggleStrict">{{strictChipText}}</view>
+      <view class="chip-btn {{canUndo ? '' : 'chip-disabled'}}" hover-class="press-hover" hover-stay-time="80" bindtap="onUndo">撤销</view>
+      <view class="chip-btn chip-danger" hover-class="press-hover" hover-stay-time="80" bindtap="onFinish">结束对局</view>
     </view>
   </view>
 
@@ -21,7 +23,7 @@
         <view class="avatar" style="background: {{item.color}}">{{item.short}}</view>
         <view class="rank-name">{{item.name}}</view>
         <view class="rank-total">{{item.totalText}}</view>
-        <view wx:if="{{item.isBig}}" class="big-badge">大赢家</view>
+        <view wx:if="{{item.isBig}}" class="big-badge">{{winnerLabel}}</view>
       </view>
     </view>
   </scroll-view>
@@ -75,6 +77,8 @@
           wx:key="id"
           class="pick-chip {{landlordIndex === index ? 'pick-on' : ''}}"
           data-index="{{index}}"
+          hover-class="press-hover"
+          hover-stay-time="80"
           bindtap="onPickLandlord"
         >
           <view class="dot" style="background: {{item.color}}"></view>
@@ -84,17 +88,20 @@
 
       <view class="ctrl-title">地主胜负</view>
       <view class="seg flex">
-        <view class="seg-item {{landlordWin ? 'seg-on-win' : ''}}" data-win="win" bindtap="onSetWin">地主胜</view>
-        <view class="seg-item {{!landlordWin ? 'seg-on-lose' : ''}}" data-win="lose" bindtap="onSetWin">地主败</view>
+        <view class="seg-item {{landlordWin ? 'seg-on-win' : ''}}" data-win="win" hover-class="press-hover" hover-stay-time="80" bindtap="onSetWin">地主胜</view>
+        <view class="seg-item {{!landlordWin ? 'seg-on-lose' : ''}}" data-win="lose" hover-class="press-hover" hover-stay-time="80" bindtap="onSetWin">地主败</view>
       </view>
 
       <view class="ctrl-title">倍数事件 · 各 ×2 连乘</view>
       <view class="flex wrap chip-row">
-        <view class="mul-chip {{bombOn ? 'mul-on' : ''}}" data-key="bombOn" bindtap="onToggleMul">炸弹 ×2</view>
-        <view class="mul-chip {{rocketOn ? 'mul-on' : ''}}" data-key="rocketOn" bindtap="onToggleMul">火箭 ×2</view>
-        <view class="mul-chip {{springOn ? 'mul-on' : ''}}" data-key="springOn" bindtap="onToggleMul">春天 ×2</view>
+        <view class="mul-chip {{bombOn ? 'mul-on' : ''}}" data-key="bombOn" hover-class="press-hover" hover-stay-time="80" bindtap="onToggleMul">炸弹 ×2</view>
+        <view class="mul-chip {{rocketOn ? 'mul-on' : ''}}" data-key="rocketOn" hover-class="press-hover" hover-stay-time="80" bindtap="onToggleMul">火箭 ×2</view>
+        <view class="mul-chip {{springOn ? 'mul-on' : ''}}" data-key="springOn" hover-class="press-hover" hover-stay-time="80" bindtap="onToggleMul">春天 ×2</view>
       </view>
     </block>
+
+    <!-- 当前校验状态（小字提示，位于键盘区上方） -->
+    <view wx:if="{{strictHintText}}" class="faint strict-hint">{{strictHintText}}</view>
 
     <!-- 自绘数字键盘 -->
     <view class="keypad">
@@ -105,40 +112,51 @@
           wx:key="k"
           class="key {{key.wide ? 'key-wide' : ''}} {{key.k === 'sign' && !focusSigned ? 'key-off' : ''}} {{key.k === 'del' || key.k === 'clear' ? 'key-fn' : ''}}"
           data-k="{{key.k}}"
+          hover-class="press-hover"
+          hover-stay-time="80"
           bindtap="onKey"
         >{{key.label}}</view>
       </view>
     </view>
 
-    <button class="btn btn-primary submit-btn" bindtap="onSubmit">记一轮</button>
+    <button class="btn btn-primary submit-btn" hover-class="press-hover" hover-stay-time="80" bindtap="onSubmit">记一轮</button>
   </view>
 
-  <!-- 回合流水 -->
+  <!-- 回合流水（左滑废弃：外壳裁剪，内层 round-body 平移露出右侧废弃按钮） -->
   <view class="section-title">回合流水</view>
   <block wx:if="{{hasRounds}}">
     <view
       wx:for="{{roundRows}}"
       wx:key="id"
       class="round-row {{item.voided ? 'round-void' : ''}}"
-      data-id="{{item.id}}"
-      bindlongpress="onRoundLongPress"
     >
-      <view class="flex aic jcb round-head">
-        <view class="flex aic">
-          <text class="round-seq">#{{item.seq}}</text>
-          <text wx:if="{{item.voided}}" class="void-tag">已废弃</text>
+      <view class="round-void-btn" catchtap="onVoidTap" data-id="{{item.id}}">废弃</view>
+      <view
+        class="round-body {{item.swipeAnim ? 'round-anim' : ''}}"
+        style="transform: translateX({{item.tx || 0}}px)"
+        data-index="{{index}}"
+        bindtouchstart="onRowTouchStart"
+        bindtouchmove="onRowTouchMove"
+        bindtouchend="onRowTouchEnd"
+        bindtouchcancel="onRowTouchEnd"
+      >
+        <view class="flex aic jcb round-head">
+          <view class="flex aic">
+            <text class="round-seq">#{{item.seq}}</text>
+            <text wx:if="{{item.voided}}" class="void-tag">已废弃</text>
+          </view>
+          <text class="faint">{{item.timeText}}</text>
         </view>
-        <text class="faint">{{item.timeText}}</text>
-      </view>
-      <view class="flex wrap round-cells">
-        <view wx:for="{{item.cells}}" wx:for-item="cell" wx:key="name" class="cell flex aic">
-          <view class="dot" style="background: {{cell.color}}"></view>
-          <text class="cell-name">{{cell.name}}</text>
-          <text class="cell-delta {{cell.cls}}">{{cell.text}}</text>
+        <view class="flex wrap round-cells">
+          <view wx:for="{{item.cells}}" wx:for-item="cell" wx:key="name" class="cell flex aic">
+            <view class="dot" style="background: {{cell.color}}"></view>
+            <text class="cell-name">{{cell.name}}</text>
+            <text class="cell-delta {{cell.cls}}">{{cell.text}}</text>
+          </view>
         </view>
       </view>
     </view>
-    <view class="faint list-tip">长按任意回合可将其废弃</view>
+    <view class="faint list-tip">左滑回合可将其废弃</view>
   </block>
   <view wx:else class="empty">还没有回合，落下第一牌吧</view>
 
@@ -150,7 +168,7 @@
       <view wx:if="{{finalWinnerName}}" class="settle-winner flex aic jcc">
         <view class="avatar" style="background: {{finalWinnerColor}}">{{finalWinnerShort}}</view>
         <view>
-          <view class="faint winner-label">大赢家</view>
+          <view class="faint winner-label">{{winnerLabel}}</view>
           <view class="winner-name">{{finalWinnerName}}</view>
         </view>
       </view>
@@ -165,8 +183,8 @@
         </view>
       </view>
       <view class="flex settle-actions">
-        <button class="btn btn-ghost grow" bindtap="onSettleContinue">继续记录</button>
-        <button class="btn btn-primary grow" bindtap="onSettleArchive">归档战绩</button>
+        <button class="btn btn-ghost grow" hover-class="press-hover" hover-stay-time="80" bindtap="onSettleContinue">继续记录</button>
+        <button class="btn btn-primary grow" hover-class="press-hover" hover-stay-time="80" bindtap="onSettleArchive">归档战绩</button>
       </view>
     </view>
   </view>

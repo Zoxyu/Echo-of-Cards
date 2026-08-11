@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "落牌有声"
+  "navigationBarTitleText": "落牌有声",
+  "usingComponents": {
+    "custom-nav": "/components/custom-nav/custom-nav"
+  }
 }

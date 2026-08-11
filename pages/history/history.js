@@ -2,6 +2,7 @@
 // 归档对局倒序列表 + 展开全量回合流水 + 整局删除 + 再来一局
 var engine = require('../../utils/scoreEngine');
 var storageKit = require('../../utils/storageKit');
+var feedback = require('../../utils/feedbackKit');
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
@@ -22,7 +23,14 @@ function fmtSigned(v) {
 Page({
   data: {
     rows: [],      // 归档对局展示数据（JS 预计算，时间倒序）
-    hasRows: false
+    hasRows: false,
+    navPad: 0      // 自定义导航避让高度 px（来自 globalData.nav）
+  },
+
+  onLoad: function () {
+    // 自定义导航避让高度：读入 globalData.nav.navPad
+    var nav = (getApp().globalData && getApp().globalData.nav) || {};
+    this.setData({ navPad: nav.navPad || 64 });
   },
 
   onShow: function () {
@@ -65,6 +73,8 @@ Page({
         modeName: mode ? mode.name : '未知模式',
         playerCount: g.players.length,
         roundCount: g.rounds.length,
+        // 获胜者文案按模式方向派生：asc → "最优者"，WXML 只绑变量
+        winnerLabel: (mode && mode.ascending) ? '最优者' : '大赢家',
         winnerName: winner ? winner.name : '—',
         winnerShort: winner ? winner.name.charAt(0) : '—',
         winnerColor: winner ? winner.color : '#5c6470',
@@ -97,6 +107,7 @@ Page({
       confirmText: '删除',
       success: function (res) {
         if (!res.confirm) return;
+        feedback.tap(); // 删除确认轻反馈
         var archive = storageKit.getArchive();
         var rest = [];
         for (var i = 0; i < archive.length; i++) {
@@ -117,8 +128,11 @@ Page({
       if (archive[i].id === id) { src = archive[i]; break; }
     }
     if (!src) return;
+    feedback.tap(); // 再来一局轻反馈
     var options = {};
     if (src.targetScore) options.targetScore = src.targetScore;
+    // 继承源对局校验开关（旧对局缺字段视为开）
+    if (src.strictZeroSum === false) options.strictZeroSum = false;
     var game = engine.createGame(src.modeId, src.players, options);
     var root = storageKit.loadData();
     root.active.push(game);

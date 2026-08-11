@@ -1,0 +1,40 @@
+/* components/custom-nav/custom-nav.wxss —— 沉浸式导航样式
+   背景取页面底色 var(--bg)，与内容区完全一体，无描边无边界感 */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: var(--bg);
+}
+
+.nav-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 32rpx;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.nav-back {
+  width: 80rpx;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60rpx;
+  line-height: 1;
+  color: var(--text);
+  padding-bottom: 8rpx;
+}

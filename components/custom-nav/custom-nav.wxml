@@ -1,0 +1,7 @@
+<!--components/custom-nav/custom-nav.wxml —— 沉浸式导航：与页面底色完全同色无边界-->
+<view class="nav" style="padding-top: {{statusBarHeight}}px;">
+  <view class="nav-bar" style="height: {{navBarHeight}}px; padding-right: {{padRight}}px;">
+    <view wx:if="{{back}}" class="nav-back" bindtap="onBack">‹</view>
+    <view class="nav-title">{{title}}</view>
+  </view>
+</view>

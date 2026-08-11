@@ -1,13 +1,14 @@
 <!--pages/history/history.wxml —— 历史战绩：归档对局列表，点击展开回合流水-->
-<view class="page">
+<custom-nav title="历史战绩" back="true" />
+<view class="page" style="padding-top: {{navPad}}px;">
 
+  <!-- 页头（大标题已并入自定义导航，保留副标语） -->
   <view class="history-head">
-    <view class="history-title">历史战绩</view>
     <view class="faint history-sub">归档对局 · 按结束时间倒序</view>
   </view>
 
   <block wx:if="{{hasRows}}">
-    <view wx:for="{{rows}}" wx:key="id" class="card his-card">
+    <view wx:for="{{rows}}" wx:key="id" class="card his-card" hover-class="press-hover" hover-stay-time="80">
 
       <!-- 卡片头：点击展开/收起 -->
       <view class="his-head" data-index="{{index}}" bindtap="onToggle">
@@ -22,7 +23,7 @@
         <view class="flex aic jcb his-mid">
           <view class="flex aic">
             <view class="avatar avatar-sm" style="background: {{item.winnerColor}}">{{item.winnerShort}}</view>
-            <text class="muted">大赢家</text>
+            <text class="muted">{{item.winnerLabel}}</text>
             <text class="his-winner">{{item.winnerName}}</text>
           </view>
           <text class="faint">{{item.endedAtText}}</text>
@@ -59,8 +60,8 @@
 
       <!-- 操作按钮 -->
       <view class="flex his-actions">
-        <button class="btn btn-ghost grow" data-id="{{item.id}}" catchtap="onDelete">删除</button>
-        <button class="btn btn-primary grow" data-id="{{item.id}}" catchtap="onReplay">再来一局</button>
+        <button class="btn btn-ghost grow" data-id="{{item.id}}" hover-class="press-hover" hover-stay-time="80" catchtap="onDelete">删除</button>
+        <button class="btn btn-primary grow" data-id="{{item.id}}" hover-class="press-hover" hover-stay-time="80" catchtap="onReplay">再来一局</button>
       </view>
     </view>
   </block>

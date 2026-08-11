@@ -40,6 +40,7 @@
 /* ---------- 排名条 ---------- */
 .rank-bar {
   margin: 8rpx 0 20rpx;
+  padding-top: 22rpx; /* 为 top:-16rpx 的大赢家徽章留出裁剪区内空间 */
   white-space: nowrap;
 }
 .rank-inner {
@@ -52,7 +53,7 @@
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  min-width: 150rpx;
+  min-width: 164rpx;
   background: var(--bg-card);
   border: 1rpx solid var(--line-soft);
   border-radius: var(--r-2);
@@ -60,7 +61,7 @@
 }
 .rank-item.rank-big {
   border-color: var(--accent);
-  background: linear-gradient(170deg, rgba(245, 185, 66, 0.14), var(--bg-card));
+  background: linear-gradient(170deg, var(--accent-tint-strong), var(--bg-card));
 }
 .rank-name {
   margin-top: 10rpx;
@@ -78,7 +79,8 @@
 .big-badge {
   position: absolute;
   top: -16rpx;
-  right: -10rpx;
+  right: 4rpx;
+  white-space: nowrap;
   font-size: var(--fs-1);
   color: var(--accent-ink);
   background: var(--accent);
@@ -126,7 +128,7 @@
 }
 .slot-focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4rpx rgba(245, 185, 66, 0.12);
+  box-shadow: 0 0 0 4rpx var(--accent-tint);
 }
 .slot-auto {
   border-style: dashed;
@@ -176,7 +178,7 @@
 .pick-on {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(245, 185, 66, 0.1);
+  background: var(--accent-tint);
 }
 .seg {
   border-radius: var(--r-2);
@@ -212,7 +214,7 @@
 .mul-on {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(245, 185, 66, 0.1);
+  background: var(--accent-tint);
   font-weight: 700;
 }
 
@@ -244,7 +246,7 @@
 }
 .key-wide {
   flex: 3;
-  background: rgba(245, 185, 66, 0.12);
+  background: var(--accent-tint);
   color: var(--accent);
   font-size: var(--fs-3);
 }
@@ -263,13 +265,37 @@
   letter-spacing: 6rpx;
 }
 
-/* ---------- 回合流水 ---------- */
+/* ---------- 回合流水（左滑废弃：外壳裁剪 + 内层平移） ---------- */
 .round-row {
+  position: relative;
+  overflow: hidden;
   background: var(--bg-card);
   border: 1rpx solid var(--line-soft);
   border-radius: var(--r-2);
-  padding: 20rpx 24rpx;
   margin-bottom: 16rpx;
+}
+.round-body {
+  position: relative;
+  background: var(--bg-card);
+  padding: 20rpx 24rpx;
+}
+.round-body.round-anim {
+  transition: transform 0.2s ease; /* 松手吸附/回弹动画，拖动中移除保跟手 */
+}
+.round-void-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 160rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bad);
+  color: #ffffff;
+  font-size: var(--fs-3);
+  font-weight: 700;
+  letter-spacing: 4rpx;
 }
 .round-void {
   opacity: 0.45;
@@ -308,6 +334,21 @@
   margin-top: 8rpx;
 }
 
+/* ---------- 校验开关 chip 与状态提示 ---------- */
+.chip-strict-on {
+  color: var(--accent);
+  border-color: var(--accent-deep);
+}
+.chip-fixed {
+  opacity: 0.7;
+}
+.strict-hint {
+  margin-top: 24rpx;
+  text-align: center;
+  font-size: var(--fs-1);
+  letter-spacing: 2rpx;
+}
+
 /* ---------- 终局结算面板 ---------- */
 .mask {
   position: fixed;
@@ -315,7 +356,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  background: rgba(5, 7, 10, 0.78);
+  background: var(--mask-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -348,8 +389,8 @@
   margin: 36rpx 0;
   padding: 24rpx;
   border-radius: var(--r-2);
-  background: rgba(245, 185, 66, 0.08);
-  border: 1rpx solid rgba(245, 185, 66, 0.3);
+  background: var(--accent-tint);
+  border: 1rpx solid var(--accent-tint-strong);
 }
 .winner-label {
   font-size: var(--fs-1);
