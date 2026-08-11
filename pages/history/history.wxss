@@ -51,7 +51,7 @@
 .his-winner {
   margin-left: 12rpx;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-text); /* 文字用深色 --accent-text，浅色下亮金对比度不足 */
 }
 
 /* ---------- 展开的回合流水 ---------- */
@@ -75,7 +75,7 @@
 }
 .round-seq {
   font-weight: 800;
-  color: var(--accent);
+  color: var(--accent-text);
   margin-right: 14rpx;
   font-size: var(--fs-2);
 }

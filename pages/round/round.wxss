@@ -11,7 +11,7 @@
 .mode-tag {
   font-size: var(--fs-2);
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-text); /* 文字用深色 --accent-text，浅色下亮金对比度不足 */
   border: 1rpx solid var(--accent-deep);
   border-radius: var(--r-full);
   padding: 8rpx 28rpx;
@@ -95,7 +95,7 @@
 }
 .target-leader {
   font-size: var(--fs-2);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .bar {
   margin-top: 18rpx;
@@ -177,7 +177,7 @@
 }
 .pick-on {
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-tint);
 }
 .seg {
@@ -213,7 +213,7 @@
 }
 .mul-on {
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-tint);
   font-weight: 700;
 }
@@ -247,7 +247,7 @@
 .key-wide {
   flex: 3;
   background: var(--accent-tint);
-  color: var(--accent);
+  color: var(--accent-text);
   font-size: var(--fs-3);
 }
 .key-fn {
@@ -305,7 +305,7 @@
 }
 .round-seq {
   font-weight: 800;
-  color: var(--accent);
+  color: var(--accent-text);
   margin-right: 14rpx;
 }
 .void-tag {
@@ -336,7 +336,7 @@
 
 /* ---------- 校验开关 chip 与状态提示 ---------- */
 .chip-strict-on {
-  color: var(--accent);
+  color: var(--accent-text);
   border-color: var(--accent-deep);
 }
 .chip-fixed {
@@ -376,7 +376,7 @@
   text-align: center;
   font-size: var(--fs-1);
   letter-spacing: 10rpx;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .settle-title {
   text-align: center;
@@ -399,7 +399,7 @@
 .winner-name {
   font-size: var(--fs-4);
   font-weight: 800;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .settle-list {
   margin-bottom: 32rpx;

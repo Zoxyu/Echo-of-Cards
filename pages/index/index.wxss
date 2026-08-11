@@ -12,7 +12,7 @@
   display: inline-block;
   font-size: var(--fs-1);
   letter-spacing: 8rpx;
-  color: var(--accent);
+  color: var(--accent-text); /* 文字用深色 --accent-text，浅色下亮金对比度不足 */
   border: 1rpx solid var(--accent-deep);
   border-radius: var(--r-full);
   padding: 6rpx 20rpx;
@@ -47,7 +47,7 @@
   font-weight: 700;
 }
 .mode-on .mode-name {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .mode-count {
   font-size: var(--fs-1);
@@ -76,7 +76,7 @@
   text-align: right;
   font-size: var(--fs-5);
   font-weight: 800;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* ---------- 人数宫格 ---------- */
@@ -182,11 +182,11 @@
 .active-total {
   font-weight: 800;
   font-size: var(--fs-3);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .continue-tag {
   font-size: var(--fs-2);
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-tint);
   border-radius: var(--r-full);
   padding: 8rpx 24rpx;
@@ -203,7 +203,7 @@
 }
 .history-arrow {
   font-size: var(--fs-4);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .page-foot {

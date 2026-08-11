@@ -13,12 +13,13 @@ page {
 
   /* ---------- 文字 ---------- */
   --text: #1c1f26;
-  --text-dim: #6a7280;
-  --text-faint: #9aa2ae;
+  --text-dim: #565e6b;    /* 次级文字：浅底对比度 ≥ 5:1（原 #6a7280 ≈ 4.6:1，压暗一档提升阅读舒适度） */
+  --text-faint: #7c8493;  /* 弱化文字：浅底对比度 ≈ 3.7:1（原 #9aa2ae ≈ 2.6:1，原值达不到大字 3:1 底线） */
 
   /* ---------- 主色与语义色 ---------- */
-  --accent: #f5b942;      /* 主色：琥珀金 */
+  --accent: #f5b942;      /* 主色：琥珀金（背景填充/边框等非文字用途） */
   --accent-deep: #c98f1b;
+  --accent-text: #8f6400; /* 主色文字专用：深琥珀金，白底对比度 ≥ 4.5:1（--accent 在浅底仅 ≈1.8:1，不宜直接作文字色） */
   --accent-ink: #1d1503;  /* 主色按钮上的文字 */
   --good: #1a8f47;        /* 正分 */
   --bad: #d93a2f;         /* 负分 */
@@ -87,6 +88,7 @@ page {
     /* ---------- 主色与语义色 ---------- */
     --accent: #f5b942;      /* 主色：琥珀金 */
     --accent-deep: #c98f1b;
+    --accent-text: #f5b942; /* 主色文字专用：深底上亮金对比度充足，取亮金保持原视觉口径（深色模式未作调整） */
     --accent-ink: #1d1503;  /* 主色按钮上的文字 */
     --good: #4cd97b;        /* 正分 */
     --bad: #ff6b5e;         /* 负分 */
@@ -129,6 +131,127 @@ page {
     --fs-5: 48rpx;
     --fs-6: 64rpx;
   }
+}
+
+/* ---------- 手动主题偏好：页面级类名覆盖 ----------
+   页面根节点 .theme-root 挂载 theme-light / theme-dark（由 app.js themeClassFor 派生）；
+   偏好为“跟随系统”时不加类，走上文 @media 逻辑。
+   CSS 变量可穿透自定义组件边界继承，custom-nav 背景/文字随之联动；
+   两组变量与上方基线 / @media 深色覆盖完全一致，需同步维护 */
+
+.theme-root {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* 手动浅色：系统深色时 page 元素已被 @media 覆盖为深色，需在子树内重置回浅色
+   变量取值与浅色基线 page{} 完全一致（含对比度优化后的文字色），需同步维护 */
+.theme-light {
+  --bg: #f4f5f7;
+  --bg-soft: #eceef2;
+  --bg-card: #ffffff;
+  --bg-deep: #e9ebf0;
+  --line: #d7dae1;
+  --line-soft: #e4e7ec;
+
+  --text: #1c1f26;
+  --text-dim: #565e6b;
+  --text-faint: #7c8493;
+
+  --accent: #f5b942;
+  --accent-deep: #c98f1b;
+  --accent-text: #8f6400; /* 主色文字专用（与浅色基线 page{} 一致） */
+  --accent-ink: #1d1503;
+  --good: #1a8f47;
+  --bad: #d93a2f;
+
+  --avatar-ink: #10131a;
+  --mask-bg: rgba(28, 31, 38, 0.55);
+  --accent-tint: rgba(201, 143, 27, 0.08);
+  --accent-tint-strong: rgba(201, 143, 27, 0.20);
+
+  --pc0: #f5b942;
+  --pc1: #4cc3ff;
+  --pc2: #4cd97b;
+  --pc3: #ff6b5e;
+  --pc4: #b48cff;
+  --pc5: #ff9f43;
+  --pc6: #3ee0c8;
+  --pc7: #ff7ab8;
+
+  --sp-1: 8rpx;
+  --sp-2: 16rpx;
+  --sp-3: 24rpx;
+  --sp-4: 32rpx;
+  --sp-5: 48rpx;
+  --sp-6: 64rpx;
+
+  --r-1: 12rpx;
+  --r-2: 20rpx;
+  --r-3: 32rpx;
+  --r-full: 999rpx;
+
+  --fs-1: 22rpx;
+  --fs-2: 26rpx;
+  --fs-3: 30rpx;
+  --fs-4: 36rpx;
+  --fs-5: 48rpx;
+  --fs-6: 64rpx;
+}
+
+/* 手动深色：变量与 @media (prefers-color-scheme: dark) 覆盖完全一致 */
+.theme-dark {
+  --bg: #0c0e12;
+  --bg-soft: #12141a;
+  --bg-card: #191c24;
+  --bg-deep: #0a0c0f;
+  --line: #272c37;
+  --line-soft: #1f232d;
+
+  --text: #f2f3f5;
+  --text-dim: #98a0ae;
+  --text-faint: #5c6470;
+
+  --accent: #f5b942;
+  --accent-deep: #c98f1b;
+  --accent-text: #f5b942; /* 主色文字专用：与 @media 深色块一致（深色模式未作调整） */
+  --accent-ink: #1d1503;
+  --good: #4cd97b;
+  --bad: #ff6b5e;
+
+  --avatar-ink: #10131a;
+  --mask-bg: rgba(5, 7, 10, 0.78);
+  --accent-tint: rgba(245, 185, 66, 0.10);
+  --accent-tint-strong: rgba(245, 185, 66, 0.28);
+
+  --pc0: #f5b942;
+  --pc1: #4cc3ff;
+  --pc2: #4cd97b;
+  --pc3: #ff6b5e;
+  --pc4: #b48cff;
+  --pc5: #ff9f43;
+  --pc6: #3ee0c8;
+  --pc7: #ff7ab8;
+
+  --sp-1: 8rpx;
+  --sp-2: 16rpx;
+  --sp-3: 24rpx;
+  --sp-4: 32rpx;
+  --sp-5: 48rpx;
+  --sp-6: 64rpx;
+
+  --r-1: 12rpx;
+  --r-2: 20rpx;
+  --r-3: 32rpx;
+  --r-full: 999rpx;
+
+  --fs-1: 22rpx;
+  --fs-2: 26rpx;
+  --fs-3: 30rpx;
+  --fs-4: 36rpx;
+  --fs-5: 48rpx;
+  --fs-6: 64rpx;
 }
 
 /* ================= Flex 工具类 ================= */
