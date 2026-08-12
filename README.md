@@ -39,7 +39,7 @@ project.2/
 ├── app.json                    # 页面路由、沉浸式导航（navigationStyle:custom）与 darkmode 配置
 ├── app.wxss                    # 日夜双主题：浅色基线 + prefers-color-scheme 深色覆盖、工具类
 ├── theme.json                  # 深浅两套导航/背景色变量（配合 app.json @变量引用）
-├── project.config.json         # 开发者工具项目配置（appid: touristappid 测试号）
+├── project.config.json         # 开发者工具项目配置（appid: wxfa79cbd689acb144 已注册小程序）
 ├── project.private.config.json # 开发者工具个人配置
 ├── sitemap.json                # 索引声明：纯本地工具，不采集任何用户数据
 ├── 项目计划书.md                # 项目规划、模式规则、架构与版本路线图
@@ -75,7 +75,7 @@ project.2/
 
 1. **安装** [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)（稳定版即可）；
 2. **导入项目**：打开开发者工具 → 导入项目 → 选择本项目根目录（包含 `app.json` 的目录）；
-3. **AppID**：选择「测试号」（`touristappid`，项目配置中已预填），无需注册小程序账号；
+3. **AppID**：项目配置中已预填正式 appid `wxfa79cbd689acb144`；若在其他设备导入且无该 appid 权限，可临时改用「测试号」体验；
 4. **编译预览**：点击「编译」即可在模拟器运行，或点击「预览」扫码在真机体验。
 
 ## 📖 使用说明
