@@ -8,7 +8,7 @@
     "navigationStyle": "custom",
     "navigationBarBackgroundColor": "@navBgColor",
     "navigationBarTextStyle": "@navTxtStyle",
-    "navigationBarTitleText": "落牌有声",
+    "navigationBarTitleText": "声声入册",
     "backgroundColor": "@bgColor",
     "backgroundTextStyle": "@bgTxtStyle"
   },

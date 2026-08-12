@@ -1,5 +1,5 @@
 {
-  "description": "落牌有声 (Echo of Cards) —— 纯本地积分记录小程序",
+  "description": "声声入册 (Echo Ledger) —— 纯本地积分记录小程序",
   "packOptions": {
     "ignore": [],
     "include": []
@@ -39,7 +39,7 @@
   "compileType": "miniprogram",
   "libVersion": "3.4.10",
   "appid": "wxfa79cbd689acb144",
-  "projectname": "echo-of-cards",
+  "projectname": "echo-ledger",
   "condition": {},
   "editorSetting": {
     "tabIndent": "insertSpaces",
