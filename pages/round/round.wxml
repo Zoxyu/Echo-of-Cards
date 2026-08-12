@@ -1,4 +1,6 @@
 <!--pages/round/round.wxml —— 计分局核心页-->
+<!-- theme-root 承载手动主题偏好类名（theme-light / theme-dark），空类名时跟随系统 -->
+<view class="theme-root {{themeClass}}">
 <custom-nav title="计分局" back="true" />
 <view class="page" style="padding-top: {{navPad}}px;">
 
@@ -6,7 +8,7 @@
   <view class="topbar flex aic jcb">
     <view class="mode-tag">{{modeName}}</view>
     <view class="flex aic topbar-actions">
-      <view class="chip-btn {{strictOn ? 'chip-strict-on' : ''}} {{strictFixed ? 'chip-fixed' : ''}}" hover-class="press-hover" hover-stay-time="80" bindtap="onToggleStrict">{{strictChipText}}</view>
+      <view wx:if="{{!strictHidden}}" class="chip-btn {{strictOn ? 'chip-strict-on' : ''}} {{strictFixed ? 'chip-fixed' : ''}}" hover-class="press-hover" hover-stay-time="80" bindtap="onToggleStrict">{{strictChipText}}</view>
       <view class="chip-btn {{canUndo ? '' : 'chip-disabled'}}" hover-class="press-hover" hover-stay-time="80" bindtap="onUndo">撤销</view>
       <view class="chip-btn chip-danger" hover-class="press-hover" hover-stay-time="80" bindtap="onFinish">结束对局</view>
     </view>
@@ -28,11 +30,13 @@
     </view>
   </scroll-view>
 
-  <!-- target 模式：目标分进度 -->
+  <!-- 目标类模式进度：降序显示目标分/领先，升序（asc）接线 targetLabel 显示罚分上限/逼近文案 -->
   <view wx:if="{{targetInfo}}" class="card target-progress">
     <view class="flex aic jcb">
-      <text class="muted">目标 {{targetInfo.target}} 分</text>
-      <text class="target-leader">领先 {{targetInfo.leaderName}} {{targetInfo.leaderTotal}} 分</text>
+      <text wx:if="{{ascending}}" class="muted">{{targetInfo.targetLabel}} {{targetInfo.target}} 分</text>
+      <text wx:else class="muted">目标 {{targetInfo.target}} 分</text>
+      <text wx:if="{{ascending}}" class="target-leader">{{targetInfo.leaderName}} 已累 {{targetInfo.leaderTotal}} 分 · 逼近上限</text>
+      <text wx:else class="target-leader">领先 {{targetInfo.leaderName}} {{targetInfo.leaderTotal}} 分</text>
     </view>
     <view class="bar">
       <view class="bar-fill" style="width: {{targetInfo.percent}}%"></view>
@@ -189,4 +193,5 @@
     </view>
   </view>
 
+</view>
 </view>

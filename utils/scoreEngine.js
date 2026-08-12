@@ -62,6 +62,8 @@ function checkBalance(deltas) {
 //   ascending?,        可选，true 表示低分获胜（缺省视为 false）
 //   hasTargetScore?,   可选，需要开局配置目标分
 //   defaultTarget?,    可选，目标分默认值
+//   allowZeroSumAssist?, 可选，false 表示录入域受限（如仅允许非负罚分），
+//                        禁用零和补全输入形态与平衡校验（缺省视为 true）
 //   fields:[输入字段定义],
 //   validate(inputs, game) -> 错误信息 | null,
 //   settle(inputs, game)   -> { playerId: delta },
@@ -335,6 +337,9 @@ MODES.uno = {
   ascending: true,
   hasTargetScore: true,
   defaultTarget: 500,
+  // 罚分仅允许非负录入：零和补全会产生负值，与该模式录入域冲突，
+  // 故禁用零和补全输入形态与平衡校验（页面据此隐藏校验开关 chip）
+  allowZeroSumAssist: false,
   fields: [
     { key: 'scores', label: '本轮罚分', type: 'perPlayerSigned', hint: '逐位录入本轮新增罚分，不可为负' }
   ],
@@ -413,8 +418,11 @@ function createGame(modeId, players, options) {
     // 其余目标类模式（guandan/uno）未传时取模式默认目标分
     game.targetScore = mode.defaultTarget || 500;
   }
-  // 零和严格校验开关：未传默认开启，后续任务提供 UI 开关
-  game.strictZeroSum = (options.strictZeroSum === undefined) ? true : !!options.strictZeroSum;
+  // 零和严格校验开关：未传默认开启
+  // 录入域受限模式（allowZeroSumAssist: false，如 uno 非负罚分）恒关，避免与补全/平衡校验冲突
+  game.strictZeroSum = (mode.allowZeroSumAssist === false)
+    ? false
+    : ((options.strictZeroSum === undefined) ? true : !!options.strictZeroSum);
   return game;
 }
 

@@ -31,6 +31,7 @@ Page({
   data: {
     modes: [],             // 模式卡片数据（由 listModes 驱动）
     selectedModeId: 'free',
+    selectedNoStrict: false, // 选中模式是否录入域受限（allowZeroSumAssist === false，如 uno）：隐藏平衡校验开关
     isTargetMode: false,   // 选中模式的 hasTargetScore 为 true 时显示目标分输入
     targetScore: '500',
     counts: [2, 3, 4, 5, 6, 7, 8],
@@ -40,13 +41,15 @@ Page({
     strictZeroSum: true,   // 分数平衡校验开关（默认开启，传入 createGame options）
     activeRows: [],        // 进行中对局展示数据（JS 预计算）
     hasActive: false,
-    navPad: 0              // 自定义导航避让高度 px（来自 globalData.nav）
+    navPad: 0,             // 自定义导航避让高度 px（来自 globalData.nav）
+    themeClass: ''         // 手动主题偏好根节点类名（theme-light / theme-dark，空为跟随系统）
   },
 
   onLoad: function () {
     // 自定义导航避让高度：读入 globalData.nav.navPad
     var nav = (getApp().globalData && getApp().globalData.nav) || {};
     this.setData({ navPad: nav.navPad || 64 });
+    this.syncThemeClass();
     // 模式卡片数据驱动渲染
     var modes = engine.listModes().map(function (m) {
       return {
@@ -55,6 +58,8 @@ Page({
         desc: m.desc,
         hasTargetScore: !!m.hasTargetScore,
         defaultTarget: m.defaultTarget || 500,
+        // 录入域受限模式（如 uno 非负罚分）：不适用平衡校验，隐藏校验开关
+        noStrict: m.allowZeroSumAssist === false,
         countText: m.playerCount[0] === m.playerCount[1]
           ? '固定 ' + m.playerCount[0] + ' 人'
           : m.playerCount[0] + '~' + m.playerCount[1] + ' 人'
@@ -65,7 +70,15 @@ Page({
   },
 
   onShow: function () {
+    this.syncThemeClass(); // 可能在他页切换过主题，重新可见时同步
     this.refreshActive();
+  },
+
+  // 手动主题偏好 → 根节点类名（'system' 为空串，走 @media 系统跟随）
+  syncThemeClass: function () {
+    var app = getApp();
+    var pref = (app.globalData && app.globalData.themePref) || 'system';
+    this.setData({ themeClass: app.themeClassFor(pref) });
   },
 
   // ---------- 玩家构建 ----------
@@ -100,6 +113,8 @@ Page({
     var n = isFixed ? mode.playerCount[0] : this.data.playerCount;
     this.setData({
       selectedModeId: id,
+      // 录入域受限模式（如 uno）：createGame 强制 strictZeroSum 为 false，开关无效故隐藏
+      selectedNoStrict: mode.allowZeroSumAssist === false,
       // 目标分输入显示条件：读模式注册表 hasTargetScore
       isTargetMode: !!mode.hasTargetScore,
       targetScore: String(mode.defaultTarget || 500),

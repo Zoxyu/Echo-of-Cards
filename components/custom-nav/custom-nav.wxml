@@ -3,5 +3,8 @@
   <view class="nav-bar" style="height: {{navBarHeight}}px; padding-right: {{padRight}}px;">
     <view wx:if="{{back}}" class="nav-back" bindtap="onBack">‹</view>
     <view class="nav-title">{{title}}</view>
+    <!-- 白夜模式切换键：三态循环（跟随系统 → 浅色 → 深色），
+         靠右排布，位于 nav-bar padding-right 胶囊避让区内侧，不与胶囊重叠 -->
+    <view class="nav-theme" hover-class="nav-theme-hover" hover-stay-time="80" bindtap="onThemeTap">{{themeIcon}}</view>
   </view>
 </view>

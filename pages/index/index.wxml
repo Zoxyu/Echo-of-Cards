@@ -1,4 +1,6 @@
 <!--pages/index/index.wxml —— 首页：上半部分开局配置，下半部分进行中对局-->
+<!-- theme-root 承载手动主题偏好类名（theme-light / theme-dark），空类名时跟随系统 -->
+<view class="theme-root {{themeClass}}">
 <custom-nav title="落牌有声" />
 <view class="page" style="padding-top: {{navPad}}px;">
 
@@ -80,8 +82,9 @@
     </view>
   </view>
 
-  <!-- 分数平衡校验开关（默认开启，传入 createGame options.strictZeroSum） -->
-  <view class="card strict-card flex aic jcb">
+  <!-- 分数平衡校验开关（默认开启，传入 createGame options.strictZeroSum）；
+       录入域受限模式（selectedNoStrict，如 uno）开关无效，隐藏 -->
+  <view wx:if="{{!selectedNoStrict}}" class="card strict-card flex aic jcb">
     <view>
       <view class="strict-label">分数平衡校验</view>
       <view class="faint strict-hint">每轮全场输赢合计必须为 0</view>
@@ -131,4 +134,5 @@
   </view>
 
   <view class="page-foot">纯本地记录 · 数据仅存于本机</view>
+</view>
 </view>

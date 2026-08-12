@@ -4,6 +4,9 @@
 var STORAGE_KEY = 'echo_cards_data_v1';
 var SCHEMA_VERSION = 1;
 
+// 主题偏好独立键（与数据同风格带版本前缀）：取值 'system' | 'light' | 'dark'
+var THEME_KEY = 'echo_cards_theme_v1';
+
 // 默认根结构：{ schemaVersion, active:[Game], archive:[Game] }
 function defaultRoot() {
   return {
@@ -86,14 +89,41 @@ function saveArchive(list) {
   return saveData(root);
 }
 
+// ---------- 主题偏好（手动切换白夜模式） ----------
+
+// 读取主题偏好；缺失 / 非法值 / 读取失败均兜底 'system'（跟随系统）
+function getThemePref() {
+  var v = null;
+  try {
+    v = wx.getStorageSync(THEME_KEY);
+  } catch (e) {
+    return 'system';
+  }
+  if (v === 'light' || v === 'dark' || v === 'system') return v;
+  return 'system';
+}
+
+// 写入主题偏好；失败返回 false（调用方需提示）
+function saveThemePref(pref) {
+  try {
+    wx.setStorageSync(THEME_KEY, pref);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 module.exports = {
   STORAGE_KEY: STORAGE_KEY,
   SCHEMA_VERSION: SCHEMA_VERSION,
+  THEME_KEY: THEME_KEY,
   loadData: loadData,
   saveData: saveData,
   getActive: getActive,
   saveActive: saveActive,
   getArchive: getArchive,
   saveArchive: saveArchive,
+  getThemePref: getThemePref,
+  saveThemePref: saveThemePref,
   migrate: migrate
 };

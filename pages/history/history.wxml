@@ -1,4 +1,6 @@
 <!--pages/history/history.wxml —— 历史战绩：归档对局列表，点击展开回合流水-->
+<!-- theme-root 承载手动主题偏好类名（theme-light / theme-dark），空类名时跟随系统 -->
+<view class="theme-root {{themeClass}}">
 <custom-nav title="历史战绩" back="true" />
 <view class="page" style="padding-top: {{navPad}}px;">
 
@@ -72,4 +74,5 @@
     <view class="faint empty-sub">结束一局对局后会归档到这里</view>
   </view>
 
+</view>
 </view>

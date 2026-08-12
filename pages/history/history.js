@@ -24,17 +24,27 @@ Page({
   data: {
     rows: [],      // 归档对局展示数据（JS 预计算，时间倒序）
     hasRows: false,
-    navPad: 0      // 自定义导航避让高度 px（来自 globalData.nav）
+    navPad: 0,     // 自定义导航避让高度 px（来自 globalData.nav）
+    themeClass: '' // 手动主题偏好根节点类名（theme-light / theme-dark，空为跟随系统）
   },
 
   onLoad: function () {
     // 自定义导航避让高度：读入 globalData.nav.navPad
     var nav = (getApp().globalData && getApp().globalData.nav) || {};
     this.setData({ navPad: nav.navPad || 64 });
+    this.syncThemeClass();
   },
 
   onShow: function () {
+    this.syncThemeClass(); // 可能在他页切换过主题，重新可见时同步
     this.refresh();
+  },
+
+  // 手动主题偏好 → 根节点类名（'system' 为空串，走 @media 系统跟随）
+  syncThemeClass: function () {
+    var app = getApp();
+    var pref = (app.globalData && app.globalData.themePref) || 'system';
+    this.setData({ themeClass: app.themeClassFor(pref) });
   },
 
   // 从存储重算全部展示数据

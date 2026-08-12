@@ -38,3 +38,26 @@
   color: var(--text);
   padding-bottom: 8rpx;
 }
+
+/* 白夜模式切换键：靠右（margin-left:auto），位于胶囊避让区内侧；
+   底色/文字取主题变量，随手动偏好与系统跟随自动联动 */
+.nav-theme {
+  margin-left: auto;
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-full);
+  background: var(--bg-soft);
+  border: 1rpx solid var(--line);
+  font-size: 34rpx;
+  line-height: 1;
+  color: var(--text);
+}
+
+/* 按压缩放反馈（与全局 press-hover 同口径） */
+.nav-theme-hover {
+  transform: scale(0.9);
+  opacity: 0.85;
+}

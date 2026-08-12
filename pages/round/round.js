@@ -31,6 +31,7 @@ Page({
     zsInput: false,         // 零和输入形态：内置零和模式 或 strictZeroSum 开启（旧对局缺字段视为开）
     strictOn: true,         // 当前校验是否开启（展示用）
     strictFixed: false,     // 内置零和模式：校验恒开不可切换
+    strictHidden: false,    // 录入域受限模式（如 uno 非负罚分）：不适用平衡校验，隐藏 chip
     strictChipText: '校验：开',
     strictHintText: '',
 
@@ -58,6 +59,7 @@ Page({
     targetInfo: null,  // {target,targetLabel,leaderName,leaderTotal,percent}
     canUndo: false,
     navPad: 0,         // 自定义导航避让高度 px（来自 globalData.nav）
+    themeClass: '',    // 手动主题偏好根节点类名（theme-light / theme-dark，空为跟随系统）
 
     // ---------- 回合流水 ----------
     roundRows: [],     // 倒序（最新在前），JS 预计算
@@ -83,6 +85,7 @@ Page({
     // 自定义导航避让高度：读入 globalData.nav.navPad
     var nav = (getApp().globalData && getApp().globalData.nav) || {};
     this.setData({ navPad: nav.navPad || 64 });
+    this.syncThemeClass();
 
     // 废弃按钮宽 160rpx 换算 px（供左滑 clamp/吸附阈值使用）
     var winW = 375;
@@ -123,6 +126,8 @@ Page({
       ascending: ascending,
       winnerLabel: ascending ? '最优者' : '大赢家',
       strictFixed: !!mode.isZeroSum,
+      // 录入域受限模式（mode.allowZeroSumAssist === false）隐藏校验 chip
+      strictHidden: mode.allowZeroSumAssist === false,
       zsInput: form.zsInput,
       slots: form.slots,
       values: this._raw.slice(),
@@ -136,6 +141,17 @@ Page({
     this.refreshView();
   },
 
+  onShow: function () {
+    this.syncThemeClass(); // 可能在他页切换过主题，重新可见时同步
+  },
+
+  // 手动主题偏好 → 根节点类名（'system' 为空串，走 @media 系统跟随）
+  syncThemeClass: function () {
+    var app = getApp();
+    var pref = (app.globalData && app.globalData.themePref) || 'system';
+    this.setData({ themeClass: app.themeClassFor(pref) });
+  },
+
   onUnload: function () {
     // 离开页面关闭常亮
     wx.setKeepScreenOn({ keepScreenOn: false });
@@ -144,10 +160,13 @@ Page({
   // ---------- 槽位构建 ----------
 
   // 输入形态：内置零和模式 或 strictZeroSum !== false（旧对局缺字段视为 true）时，
-  // perPlayer 走零和形态：前 n-1 人录入、末位自动补全
+  // perPlayer 走零和形态：前 n-1 人录入、末位自动补全；
+  // 录入域受限模式（mode.allowZeroSumAssist === false，如 uno 非负罚分）
+  // 补全会产生非法负值，恒走全员录入形态
   buildInputForm: function (game, kind) {
     var mode = engine.getMode(game.modeId);
     var zsInput = kind === 'perPlayer' &&
+      mode.allowZeroSumAssist !== false &&
       (!!mode.isZeroSum || game.strictZeroSum !== false);
     var slots = this.buildSlots(game, kind, zsInput);
     var autoSlot = null;
@@ -318,8 +337,10 @@ Page({
     }
     // 2. 结算
     var deltas = mode.settle(inputs, game);
-    // 3. 平衡校验：内置零和模式恒校；其余模式 strictZeroSum 开启（旧对局缺字段视为开）时校验
-    var needCheck = !!mode.isZeroSum || game.strictZeroSum !== false;
+    // 3. 平衡校验：内置零和模式恒校；其余模式 strictZeroSum 开启（旧对局缺字段视为开）时校验；
+    // 录入域受限模式（allowZeroSumAssist === false）不适用，跳过
+    var needCheck = mode.allowZeroSumAssist !== false &&
+      (!!mode.isZeroSum || game.strictZeroSum !== false);
     if (needCheck && !engine.checkBalance(deltas)) {
       var sum = 0;
       for (var k in deltas) {
@@ -435,12 +456,15 @@ Page({
       };
     }
 
-    // 校验开关状态文案（内置零和模式恒为"常开"）
+    // 校验开关状态文案（内置零和模式恒为“常开”，录入域受限模式不适用）
     var strictOn = game.strictZeroSum !== false;
     var chipText, hintText;
     if (this.data.strictFixed) {
       chipText = '校验：常开';
       hintText = '内置零和模式 · 每轮全场合计恒为 0';
+    } else if (this.data.strictHidden) {
+      chipText = '';
+      hintText = '该模式录入不可为负 · 不适用平衡校验';
     } else if (strictOn) {
       chipText = '校验：开';
       hintText = '平衡校验：开 · 每轮全场输赢合计必须为 0';
@@ -581,9 +605,9 @@ Page({
 
   // ---------- 校验开关 ----------
 
-  // topbar chip 切换 strictZeroSum（内置零和模式不可切换）
+  // topbar chip 切换 strictZeroSum（内置零和模式不可切换，录入域受限模式 chip 已隐藏双保险拦截）
   onToggleStrict: function () {
-    if (this.data.strictFixed) return;
+    if (this.data.strictFixed || this.data.strictHidden) return;
     var game = this._game;
     var nextVal = game.strictZeroSum !== false ? false : true;
     var g2 = {};
