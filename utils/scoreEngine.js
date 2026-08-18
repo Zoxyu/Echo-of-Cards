@@ -369,7 +369,8 @@ MODES.texas = {
   id: 'texas',
   name: '德州扑克记分',
   desc: '录入前 N-1 人每手积分变化，末位自动补全，总和恒为 0',
-  playerCount: [2, 9],
+  // 上限与开局人数模板（2~8）及 8 色玩家色板保持一致
+  playerCount: [2, 8],
   isZeroSum: true,
   fields: MODES.zeroSum.fields,
   validate: MODES.zeroSum.validate,

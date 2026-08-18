@@ -36,11 +36,12 @@ Component({
     var navBarHeight = nav.navBarHeight || 44;
     var menuRight = nav.menuRight || 8;
     var menuWidth = nav.menuWidth || 87;
+    var themeGap = nav.themeGap || 12;
     this.setData({
       statusBarHeight: statusBarHeight,
       navBarHeight: navBarHeight,
-      // 右侧留白 = menuRight + 胶囊宽 + 间距，确保不与原生胶囊重叠
-      padRight: menuRight + menuWidth + 12
+      // 右侧留白 = menuRight + 胶囊宽 + 间距（navKit 按平台取值：安卓更大），确保不与原生胶囊重叠
+      padRight: menuRight + menuWidth + themeGap
     });
     this.syncTheme();
   },
