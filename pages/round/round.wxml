@@ -14,8 +14,8 @@
     </view>
   </view>
 
-  <!-- 战况仪表盘：实时排名条 -->
-  <scroll-view wx:if="{{ranking.length}}" scroll-x class="rank-bar" enhanced show-scrollbar="{{false}}">
+  <!-- 战况仪表盘：实时排名条（掼蛋 v2 换用下方队伍战况面板） -->
+  <scroll-view wx:if="{{ranking.length && inputKind !== 'guandan'}}" scroll-x class="rank-bar" enhanced show-scrollbar="{{false}}">
     <view class="rank-inner">
       <view
         wx:for="{{ranking}}"
@@ -29,6 +29,24 @@
       </view>
     </view>
   </scroll-view>
+
+  <!-- 掼蛋 v2 队伍战况：两队实时打几与打A失败计数 -->
+  <view wx:if="{{gdBoard}}" class="gd-board flex">
+    <view wx:for="{{gdBoard}}" wx:key="label" class="gd-team {{item.isWin ? 'gd-win' : ''}}">
+      <view class="flex aic jcb">
+        <text class="gd-label">{{item.label}}</text>
+        <text wx:if="{{item.isWin}}" class="gd-win-tag">过A · 终局</text>
+      </view>
+      <view class="gd-level">{{item.levelText}}</view>
+      <view class="gd-members">
+        <view wx:for="{{item.members}}" wx:for-item="m" wx:key="name" class="gd-member flex aic">
+          <view class="dot" style="background: {{m.color}}"></view>
+          <text>{{m.name}}</text>
+        </view>
+      </view>
+      <view wx:if="{{item.failsText}}" class="gd-fails">{{item.failsText}}</view>
+    </view>
+  </view>
 
   <!-- 目标类模式进度：降序显示目标分/领先，升序（asc）接线 targetLabel 显示罚分上限/逼近文案 -->
   <view wx:if="{{targetInfo}}" class="card target-progress">
@@ -46,8 +64,43 @@
   <!-- 输入区：按模式 fields 动态渲染 -->
   <view class="card input-card">
 
-    <!-- 数值槽位 -->
-    <view class="slot-grid">
+    <!-- 掼蛋 v2：选择式录入（头游 + 队友名次），无数字键盘 -->
+    <block wx:if="{{inputKind === 'guandan'}}">
+      <view class="ctrl-title">头游（最先出完牌）</view>
+      <view class="flex wrap chip-row">
+        <view
+          wx:for="{{playerList}}"
+          wx:key="id"
+          class="pick-chip {{gdHeadIndex === index ? 'pick-on' : ''}}"
+          data-index="{{index}}"
+          hover-class="press-hover"
+          hover-stay-time="80"
+          bindtap="onPickGdHead"
+        >
+          <view class="dot" style="background: {{item.color}}"></view>
+          <text>{{item.name}}</text>
+          <text class="gd-chip-team">{{item.teamLabel}}</text>
+        </view>
+      </view>
+
+      <view class="ctrl-title">头游队友的名次</view>
+      <view class="seg flex">
+        <view
+          wx:for="{{gdFinishes}}"
+          wx:key="key"
+          class="seg-item {{gdFinish === item.key ? 'seg-on-gd' : ''}}"
+          data-key="{{item.key}}"
+          hover-class="press-hover"
+          hover-stay-time="80"
+          bindtap="onPickGdFinish"
+        >{{item.label}}</view>
+      </view>
+
+      <view class="faint gd-rule-hint">双上升3级 · 头游+三游升2级 · 头游+末游升1级；打A时队友非末游即过A，三次不过回到2</view>
+    </block>
+
+    <!-- 其余模式：数值槽位 -->
+    <view wx:if="{{inputKind !== 'guandan'}}" class="slot-grid">
       <view
         wx:for="{{slots}}"
         wx:key="label"
@@ -107,8 +160,8 @@
     <!-- 当前校验状态（小字提示，位于键盘区上方） -->
     <view wx:if="{{strictHintText}}" class="faint strict-hint">{{strictHintText}}</view>
 
-    <!-- 自绘数字键盘 -->
-    <view class="keypad">
+    <!-- 自绘数字键盘（掼蛋 v2 纯选择式录入，不展示） -->
+    <view wx:if="{{inputKind !== 'guandan'}}" class="keypad">
       <view wx:for="{{keypadRows}}" wx:key="id" wx:for-item="row" class="key-row">
         <view
           wx:for="{{row.keys}}"
@@ -158,6 +211,7 @@
             <text class="cell-delta {{cell.cls}}">{{cell.text}}</text>
           </view>
         </view>
+        <view wx:if="{{item.note}}" class="round-note">{{item.note}}</view>
       </view>
     </view>
     <view class="faint list-tip">左滑回合可将其废弃</view>

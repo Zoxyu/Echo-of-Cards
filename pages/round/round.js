@@ -22,10 +22,20 @@ Page({
   data: {
     gameId: '',
     modeName: '',
-    inputKind: 'perPlayer', // perPlayer | landlord | paodekuai
+    inputKind: 'perPlayer', // perPlayer | landlord | paodekuai | guandan
     isZeroSum: false,
     ascending: false,       // 低分获胜方向（供后续任务 wxml 绑定）
     winnerLabel: '大赢家',  // asc 时"最优者"，否则"大赢家"（供后续任务 wxml 绑定）
+
+    // ---------- 掼蛋·升级打A 专属 ----------
+    gdHeadIndex: 0,      // 头游（最先出完牌者）玩家索引，默认选中首位防漏选
+    gdFinish: 'second',  // 头游队友名次：second 二游 / third 三游 / last 末游
+    gdFinishes: [
+      { key: 'second', label: '二游·双上 升3级' },
+      { key: 'third', label: '三游 升2级' },
+      { key: 'last', label: '末游 升1级' }
+    ],
+    gdBoard: null,       // 队伍战况 [{label,levelText,failsText,isWin,members}]
 
     // ---------- 零和平衡校验开关 ----------
     zsInput: false,         // 零和输入形态：内置零和模式 或 strictZeroSum 开启（旧对局缺字段视为开）
@@ -109,7 +119,8 @@ Page({
     var mode = engine.getMode(game.modeId);
     var ascending = !!(mode && mode.ascending);
     var kind = game.modeId === 'landlord' ? 'landlord'
-      : (game.modeId === 'paodekuai' ? 'paodekuai' : 'perPlayer');
+      : (game.modeId === 'paodekuai' ? 'paodekuai'
+      : (engine.isGuandanV2(game) ? 'guandan' : 'perPlayer'));
 
     // 按当前模式 + 校验开关构建输入形态（槽位/末位自动补全）
     var form = this.buildInputForm(game, kind);
@@ -134,8 +145,14 @@ Page({
       focusIndex: 0,
       focusSigned: form.slots.length ? !!form.slots[0].signed : false,
       autoSlot: form.autoSlot,
-      playerList: game.players.map(function (p) {
-        return { id: p.id, name: p.name, color: p.color };
+      playerList: game.players.map(function (p, i) {
+        return {
+          id: p.id,
+          name: p.name,
+          color: p.color,
+          // 座次 → 队伍标签（掼蛋对家组队，选头游时展示所属队伍）
+          teamLabel: engine.gdTeamLabel(engine.gdTeamOfPlayerIndex(i))
+        };
       })
     });
     this.refreshView();
@@ -164,6 +181,10 @@ Page({
   // 录入域受限模式（mode.allowZeroSumAssist === false，如 uno 非负罚分）
   // 补全会产生非法负值，恒走全员录入形态
   buildInputForm: function (game, kind) {
+    // 掼蛋 v2：纯选择式录入（头游 + 队友名次），无数字槽位与零和补全
+    if (kind === 'guandan') {
+      return { slots: [], autoSlot: null, zsInput: false };
+    }
     var mode = engine.getMode(game.modeId);
     var zsInput = kind === 'perPlayer' &&
       mode.allowZeroSumAssist !== false &&
@@ -280,6 +301,16 @@ Page({
     this.setData(patch);
   },
 
+  // ---------- 掼蛋控件 ----------
+
+  onPickGdHead: function (e) {
+    this.setData({ gdHeadIndex: e.currentTarget.dataset.index });
+  },
+
+  onPickGdFinish: function (e) {
+    this.setData({ gdFinish: e.currentTarget.dataset.key });
+  },
+
   // ---------- 提交记一轮 ----------
 
   // 按模式收集输入（不含任何计算）
@@ -305,7 +336,14 @@ Page({
       }, this);
       return { base: this._raw[0], remaining: remaining };
     }
-    // perPlayer（free / zeroSum / target / guandan / uno / texas）
+    // 掼蛋 v2：头游 + 队友名次（升级步长与打A判定全部交给引擎）
+    if (this.data.inputKind === 'guandan') {
+      return {
+        headId: players[this.data.gdHeadIndex].id,
+        partnerFinish: this.data.gdFinish
+      };
+    }
+    // perPlayer（free / zeroSum / target / uno / texas / 旧版掼蛋）
     var scores = {};
     var fillCount = this.data.zsInput ? players.length - 1 : players.length;
     for (var i = 0; i < fillCount; i++) {
@@ -350,8 +388,9 @@ Page({
       feedback.impact();
       return;
     }
-    // 4. 追加回合并落库
-    var next = engine.appendRound(game, deltas);
+    // 4. 追加回合并落库（掼蛋 v2 随轮附带结果备注，供流水行展示）
+    var meta = mode.roundMeta ? mode.roundMeta(inputs, game) : undefined;
+    var next = engine.appendRound(game, deltas, meta);
     this.persist(next);
     this.resetInputs();
     // 5. 一次 setData 批量更新视图（refreshView 重建行会统一收起已展开的左滑行）
@@ -433,13 +472,14 @@ Page({
         seq: i + 1,
         timeText: fmtClock(r.ts),
         voided: r.status === 'void',
+        note: (r.meta && r.meta.note) || '', // 掼蛋 v2 结果备注（其余模式为空）
         cells: cells,
         tx: 0,          // 左滑位移 px，重建行一律归零（含提交新轮次后收起展开行）
         swipeAnim: false
       });
     }
 
-    // 目标分进度（凡带 targetScore 的对局均展示，覆盖 target/guandan/uno）
+    // 目标分进度（凡带 targetScore 的对局均展示，覆盖 target/uno/旧版掼蛋；掼蛋 v2 无目标分不展示）
     var targetInfo = null;
     if (game.targetScore !== undefined && ranking.length) {
       var t = game.targetScore || 500;
@@ -456,6 +496,32 @@ Page({
       };
     }
 
+    // 掼蛋 v2 队伍战况面板（替代个人排名条）：实时重算两队打几与打A失败次数
+    var gstate = null;
+    var gdBoard = null;
+    if (engine.isGuandanV2(game)) {
+      gstate = engine.computeGuandanState(game);
+      gdBoard = [];
+      for (var t = 0; t < 2; t++) {
+        var members = [];
+        for (var pi = 0; pi < players.length; pi++) {
+          if (engine.gdTeamOfPlayerIndex(pi) === t) {
+            members.push({ name: players[pi].name, color: players[pi].color });
+          }
+        }
+        var tSt = gstate.teams[t];
+        gdBoard.push({
+          label: engine.gdTeamLabel(t),
+          members: members,
+          levelText: '打' + engine.gdLevelText(tSt.progress),
+          // 打 A 中才展示失败计数（如"打A未过 2/3"）
+          failsText: (tSt.progress === 12 && gstate.winnerTeam === null)
+            ? '打A未过 ' + tSt.fails + '/3' : '',
+          isWin: gstate.winnerTeam === t
+        });
+      }
+    }
+
     // 校验开关状态文案（内置零和模式恒为“常开”，录入域受限模式不适用）
     var strictOn = game.strictZeroSum !== false;
     var chipText, hintText;
@@ -464,7 +530,9 @@ Page({
       hintText = '内置零和模式 · 每轮全场合计恒为 0';
     } else if (this.data.strictHidden) {
       chipText = '';
-      hintText = '该模式录入不可为负 · 不适用平衡校验';
+      hintText = this.data.inputKind === 'guandan'
+        ? '升级局每轮合计不恒为 0 · 不适用平衡校验'
+        : '该模式录入不可为负 · 不适用平衡校验';
     } else if (strictOn) {
       chipText = '校验：开';
       hintText = '平衡校验：开 · 每轮全场输赢合计必须为 0';
@@ -480,6 +548,7 @@ Page({
       hasRounds: rows.length > 0,
       canUndo: game.rounds.length > 0,
       targetInfo: targetInfo,
+      gdBoard: gdBoard,
       strictOn: strictOn,
       strictChipText: chipText,
       strictHintText: hintText
@@ -496,6 +565,18 @@ Page({
       patch.finalWinnerName = winner ? winner.name : '';
       patch.finalWinnerShort = winner ? winner.name.charAt(0) : '';
       patch.finalWinnerColor = winner ? winner.color : '';
+      // 掼蛋 v2 大赢家按队伍展示（过 A 的队伍）
+      if (engine.isGuandanV2(game) && gstate && gstate.winnerTeam !== null) {
+        var wt = gstate.winnerTeam;
+        var firstMember = null;
+        for (var m2 = 0; m2 < players.length; m2++) {
+          if (engine.gdTeamOfPlayerIndex(m2) === wt) { firstMember = players[m2]; break; }
+        }
+        patch.finalWinnerName = engine.gdTeamLabel(wt) + '（' +
+          engine.gdTeamMemberNames(game, wt) + '）';
+        patch.finalWinnerShort = engine.gdTeamLabel(wt).charAt(0);
+        patch.finalWinnerColor = firstMember ? firstMember.color : '';
+      }
     }
     this.setData(patch);
   },

@@ -37,6 +37,7 @@ Page({
     counts: [2, 3, 4, 5, 6, 7, 8],
     playerCount: 4,
     countDisabled: false,  // 固定人数模式（斗地主 3 人/掼蛋 4 人）时禁用人数选择
+    countHintText: '',     // 固定人数模式的提示文案（掼蛋含对家组队说明）
     players: [],           // [{id,name,short,color}]
     strictZeroSum: true,   // 分数平衡校验开关（默认开启，传入 createGame options）
     activeRows: [],        // 进行中对局展示数据（JS 预计算）
@@ -113,12 +114,18 @@ Page({
     var n = isFixed ? mode.playerCount[0] : this.data.playerCount;
     this.setData({
       selectedModeId: id,
-      // 录入域受限模式（如 uno）：createGame 强制 strictZeroSum 为 false，开关无效故隐藏
+      // 录入域受限模式（如 uno、掼蛋 v2）：createGame 强制 strictZeroSum 为 false，开关无效故隐藏
       selectedNoStrict: mode.allowZeroSumAssist === false,
-      // 目标分输入显示条件：读模式注册表 hasTargetScore
+      // 目标分输入显示条件：读模式注册表 hasTargetScore（掼蛋 v2 升级局无目标分）
       isTargetMode: !!mode.hasTargetScore,
       targetScore: String(mode.defaultTarget || 500),
       countDisabled: isFixed,
+      // 固定人数提示：掼蛋额外说明对家组队关系（座次 1&3 = 1队，2&4 = 2队）
+      countHintText: id === 'landlord'
+        ? '斗地主固定 3 人，人数不可调整'
+        : (id === 'guandan'
+          ? '掼蛋固定 4 人对家组队：1号&3号 = 1队，2号&4号 = 2队'
+          : ''),
       playerCount: n,
       players: this.buildPlayers(n, this.data.players)
     });
@@ -177,7 +184,7 @@ Page({
       return { id: p.id, name: name, color: p.color };
     });
     var options = {};
-    // 目标分传入条件：读模式注册表 hasTargetScore（覆盖 target/guandan/uno）
+    // 目标分传入条件：读模式注册表 hasTargetScore（覆盖 target/uno）
     if (mode.hasTargetScore) {
       options.targetScore = Number(this.data.targetScore) || mode.defaultTarget || 500;
     }
@@ -205,7 +212,7 @@ Page({
       var leader = ranking.length ? ranking[0] : null;
       // 领先者文案按模式方向派生：asc → "领先(分低者优)"，WXML 只绑变量
       var asc = !!(mode && mode.ascending);
-      return {
+      var row = {
         id: g.id,
         createdAt: g.createdAt,
         createdAtText: fmtTime(g.createdAt),
@@ -218,6 +225,34 @@ Page({
         leaderColor: leader ? leader.color : '#5c6470',
         leaderTotalText: leader ? fmtSigned(leader.total) + ' 分' : ''
       };
+      // 掼蛋 v2：领先信息按队伍展示（打几/过A），不用个人累分
+      if (engine.isGuandanV2(g)) {
+        var gstate = engine.computeGuandanState(g);
+        var t0 = gstate.teams[0], t1 = gstate.teams[1];
+        var lt = t0.progress >= t1.progress ? 0 : 1;
+        var firstMember = null;
+        for (var pi = 0; pi < g.players.length; pi++) {
+          if (engine.gdTeamOfPlayerIndex(pi) === lt) { firstMember = g.players[pi]; break; }
+        }
+        if (gstate.winnerTeam !== null) {
+          row.leaderLabel = '过A';
+          row.leaderName = engine.gdTeamLabel(gstate.winnerTeam);
+          row.leaderTotalText = '';
+        } else if (t0.progress === t1.progress) {
+          row.leaderLabel = '战况';
+          row.leaderName = '两队同打 ' + engine.gdLevelText(t0.progress);
+          row.leaderShort = '平';
+          row.leaderColor = '#5c6470';
+          row.leaderTotalText = '';
+        } else {
+          row.leaderLabel = '领先';
+          row.leaderName = engine.gdTeamLabel(lt);
+          row.leaderShort = engine.gdTeamLabel(lt).charAt(0);
+          row.leaderColor = firstMember ? firstMember.color : '#5c6470';
+          row.leaderTotalText = '打' + engine.gdLevelText(gstate.teams[lt].progress);
+        }
+      }
+      return row;
     });
     // 创建时间倒序（JS 内排序，WXML 直接渲染）
     rows.sort(function (a, b) { return b.createdAt - a.createdAt; });

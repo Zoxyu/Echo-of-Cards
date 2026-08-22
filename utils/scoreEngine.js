@@ -309,21 +309,199 @@ function targetStyleIsOver(game) {
   return false;
 }
 
-// ---------- 6. guandan 掼蛋·攒分升级 ----------
-// fields/validate/settle 直接复用 target 同款函数引用
+// ================= 掼蛋 v2（升级打A）内部工具 =================
+// 4 人固定对家组队：座次 1&3 为 1队、2&4 为 2队（teamIndex 0/1）
+// 进度语义（deltas 累计 = progress，2 + progress = 当前打几）：
+//   0..12 → 打 2..A（12 为打 A）；13 → 已过 A 终局
+//   升级步长：双上（头游+二游）+3、头游+三游 +2、头游+末游 +1（A 处封顶不再升）
+//   打 A 未过（无头游 或 头游+末游）记失败一次；累计三次失败该轮整体归 2（delta = -progress）
+//   过 A（打 A 时头游且队友非末游）该轮 +1（progress 13）即终局；
+//   同轮对方也在打 A 且未过，同样计一次失败（可能同轮归 2）
+
+var GD_A_PROGRESS = 12; // progress 达到 12 即打 A
+
+// 是否掼蛋 v2 新规则局（旧掼蛋局带 targetScore、无 gdVer，继续走 v1 累分逻辑）
+function isGuandanV2(game) {
+  return game.modeId === 'guandan' && game.gdVer === 2;
+}
+
+// 座次索引 → 队伍索引（1&3 为 1队，2&4 为 2队）
+function gdTeamOfPlayerIndex(idx) {
+  return idx % 2;
+}
+
+function gdTeamLabel(teamIdx) {
+  return (teamIdx + 1) + '队';
+}
+
+// 两名队员昵称拼接（队伍展示用）
+function gdTeamMemberNames(game, teamIdx) {
+  var names = [];
+  for (var i = 0; i < game.players.length; i++) {
+    if (gdTeamOfPlayerIndex(i) === teamIdx) names.push(game.players[i].name);
+  }
+  return names.join('·');
+}
+
+// 进度 → 打几文案（12 = A，13+ = 过A）
+function gdLevelText(progress) {
+  if (progress >= 13) return '过A';
+  if (progress === GD_A_PROGRESS) return 'A';
+  return String(2 + progress);
+}
+
+// 头游队友名次 → 升级步长与结果文案（仅未打 A 时生效）
+function gdStepOf(finish) {
+  if (finish === 'second') return { step: 3, text: '双上' };
+  if (finish === 'third') return { step: 2, text: '头游+三游' };
+  return { step: 1, text: '头游+末游' };
+}
+
+// 从全部 valid 回合重算两队进度与打A失败次数（废弃轮跳过；过A后冻结）
+// 返回 { teams: [{progress,fails}...], winnerTeam: 0|1|null }
+function computeGuandanState(game) {
+  var teams = [
+    { progress: 0, fails: 0 },
+    { progress: 0, fails: 0 }
+  ];
+  var winnerTeam = null;
+  var ids = game.players.map(function (p) { return p.id; });
+  for (var i = 0; i < game.rounds.length; i++) {
+    var r = game.rounds[i];
+    if (r.status !== 'valid' || winnerTeam !== null) continue;
+    for (var t = 0; t < 2; t++) {
+      var pid = ids[t]; // 同队两人 delta 相同，取座次代表位即可（0→1队、1→2队）
+      var d = Number(r.deltas && r.deltas[pid]) || 0;
+      var st = teams[t];
+      if (d > 0) {
+        st.progress += d;
+        st.fails = 0; // 升级/重新爬升：失败计数清零（升到 A 从 0 次起算）
+        if (st.progress >= GD_A_PROGRESS + 1) winnerTeam = t;
+      } else if (d < 0) {
+        st.progress = 0; // 三次不过 A：整体归 2
+        st.fails = 0;
+      } else if (st.progress === GD_A_PROGRESS) {
+        st.fails += 1; // 打 A 轮未升级（未过）：记一次失败
+      }
+    }
+  }
+  return { teams: teams, winnerTeam: winnerTeam };
+}
+
+// v2 录入校验：头游必须是本局玩家、队友名次三选一（由控件保证，此处双保险）
+function gdValidate(inputs, game) {
+  var headId = inputs && inputs.headId;
+  var found = false;
+  for (var i = 0; i < game.players.length; i++) {
+    if (game.players[i].id === headId) { found = true; break; }
+  }
+  if (!found) return '请选择头游';
+  var f = inputs.partnerFinish;
+  if (f !== 'second' && f !== 'third' && f !== 'last') return '请选择头游队友的名次';
+  return null;
+}
+
+// v2 结算：产出每人 delta（同队两人相同），规则见文件头注释区
+function gdSettleV2(inputs, game) {
+  var deltas = {};
+  var ids = game.players.map(function (p) { return p.id; });
+  ids.forEach(function (id) { deltas[id] = 0; });
+  var state = computeGuandanState(game);
+  if (state.winnerTeam !== null) return deltas; // 已过 A 终局：后续"继续记录"不再产生进度
+  var headIdx = -1;
+  for (var i = 0; i < ids.length; i++) {
+    if (ids[i] === inputs.headId) { headIdx = i; break; }
+  }
+  var w = gdTeamOfPlayerIndex(headIdx);
+  var finish = inputs.partnerFinish;
+  var info = gdStepOf(finish);
+  for (var t = 0; t < 2; t++) {
+    var st = state.teams[t];
+    var d = 0;
+    if (st.progress === GD_A_PROGRESS) {
+      // 打 A 轮：本队过 A（头游且队友二/三游）→ +1 终局；否则记失败，满三次归 2
+      if (t === w && (finish === 'second' || finish === 'third')) {
+        d = 1;
+      } else {
+        d = (st.fails + 1 >= 3) ? -st.progress : 0;
+      }
+    } else if (t === w) {
+      // 非 A 轮：头游队升对应级数（封顶 A，不越级到"过A"）
+      d = Math.min(info.step, GD_A_PROGRESS - st.progress);
+    }
+    if (d !== 0) {
+      for (var j = 0; j < ids.length; j++) {
+        if (gdTeamOfPlayerIndex(j) === t) deltas[ids[j]] = d;
+      }
+    }
+  }
+  return deltas;
+}
+
+// v2 回合备注（随回合落库，流水行展示）：把本轮的升级/打A结果写成一句人话
+function gdRoundMetaV2(inputs, game) {
+  var state = computeGuandanState(game);
+  if (state.winnerTeam !== null) return { note: '终局后加记 · 不计级数' };
+  var headIdx = -1;
+  for (var i = 0; i < game.players.length; i++) {
+    if (game.players[i].id === inputs.headId) { headIdx = i; break; }
+  }
+  var w = gdTeamOfPlayerIndex(headIdx);
+  var finish = inputs.partnerFinish;
+  var info = gdStepOf(finish);
+  var parts = [];
+  for (var t = 0; t < 2; t++) {
+    var st = state.teams[t];
+    var label = gdTeamLabel(t);
+    if (st.progress === GD_A_PROGRESS) {
+      if (t === w && (finish === 'second' || finish === 'third')) {
+        parts.push(label + ' 过A · 终局');
+      } else if (st.fails + 1 >= 3) {
+        parts.push(label + ' 第3次打A未过 · 回到2');
+      } else {
+        parts.push(label + ' 打A未过（第' + (st.fails + 1) + '次）');
+      }
+    } else if (t === w) {
+      var gain = Math.min(info.step, GD_A_PROGRESS - st.progress);
+      var to = gdLevelText(st.progress + gain);
+      parts.push(label + ' ' + info.text + ' 升' + gain + '级 → 打' + to);
+    }
+  }
+  return { note: parts.join('；') };
+}
+
+// ---------- 6. guandan 掼蛋·升级打A ----------
+// v2（新开局，gdVer=2）：2v2 对家组队，按名次升级打 A，三次不过 A 归 2；
+//   录入为「头游 + 队友名次」选择式，无需数字键盘（allowZeroSumAssist=false
+//   同时豁免零和补全与平衡校验——升级局每轮合计不恒为 0）
+// v1（历史局，带 targetScore 无 gdVer）：沿用原「攒分升级」目标分累分逻辑，
+//   validate/settle/isOver 委托 MODES.target，保证旧局与旧档可继续记录、可再来一局
 MODES.guandan = {
   id: 'guandan',
-  name: '掼蛋·攒分升级',
-  desc: '2v2 组队场景按人录入，队伍合计可并入同队一人；先达目标分终局',
+  name: '掼蛋·升级打A',
+  desc: '4人对家组队，从2打到A：双上升3级、头游+三游升2级、头游+末游升1级；打A三次不过回到2',
   playerCount: [4, 4],
   isZeroSum: false,
   ascending: false,
-  hasTargetScore: true,
-  defaultTarget: 1000,
-  fields: MODES.target.fields,
-  validate: MODES.target.validate,
-  settle: MODES.target.settle,
-  isOver: targetStyleIsOver
+  allowZeroSumAssist: false,
+  fields: [
+    { key: 'headId', label: '头游', type: 'playerPick' },
+    { key: 'partnerFinish', label: '头游队友名次', type: 'segment', options: ['second', 'third', 'last'] }
+  ],
+  validate: function (inputs, game) {
+    return isGuandanV2(game) ? gdValidate(inputs, game) : MODES.target.validate(inputs, game);
+  },
+  settle: function (inputs, game) {
+    return isGuandanV2(game) ? gdSettleV2(inputs, game) : MODES.target.settle(inputs, game);
+  },
+  roundMeta: function (inputs, game) {
+    return isGuandanV2(game) ? gdRoundMetaV2(inputs, game) : undefined;
+  },
+  isOver: function (game) {
+    return isGuandanV2(game)
+      ? computeGuandanState(game).winnerTeam !== null
+      : targetStyleIsOver(game);
+  }
 };
 
 // ---------- 7. uno UNO·派对罚分 ----------
@@ -416,25 +594,32 @@ function createGame(modeId, players, options) {
   } else if (modeId === 'target') {
     game.targetScore = 500; // 默认目标分
   } else if (mode.hasTargetScore) {
-    // 其余目标类模式（guandan/uno）未传时取模式默认目标分
+    // 其余目标类模式（uno）未传时取模式默认目标分（掼蛋 v2 无目标分，不走此分支）
     game.targetScore = mode.defaultTarget || 500;
   }
+  // 掼蛋 v2 标记：新开掼蛋局走升级打A规则；历史"再来一局"显式传 gdVer:1 复刻旧攒分局
   // 零和严格校验开关：未传默认开启
-  // 录入域受限模式（allowZeroSumAssist: false，如 uno 非负罚分）恒关，避免与补全/平衡校验冲突
+  // 录入域受限模式（allowZeroSumAssist: false，如 uno 非负罚分、掼蛋 v2 升级录入）
+  // 恒关，避免与补全/平衡校验冲突（升级局每轮合计不恒为 0）
   game.strictZeroSum = (mode.allowZeroSumAssist === false)
     ? false
     : ((options.strictZeroSum === undefined) ? true : !!options.strictZeroSum);
+  if (modeId === 'guandan') {
+    game.gdVer = options.gdVer === 1 ? 1 : 2;
+  }
   return game;
 }
 
-// appendRound(game, deltas) -> 新 Game（追加一个 valid 回合）
-function appendRound(game, deltas) {
+// appendRound(game, deltas, meta?) -> 新 Game（追加一个 valid 回合）
+// meta：可选回合元信息（如掼蛋 v2 的结果备注），随回合落库供流水展示
+function appendRound(game, deltas, meta) {
   var round = {
     id: genId('round'),
     ts: Date.now(),
     status: 'valid',
     deltas: clone(deltas)
   };
+  if (meta) round.meta = clone(meta);
   var next = clone(game);
   next.rounds.push(round);
   return next;
@@ -562,5 +747,12 @@ module.exports = {
   computeTotals: computeTotals,
   computeRanking: computeRanking,
   computeBigWinner: computeBigWinner,
-  isGameOver: isGameOver
+  isGameOver: isGameOver,
+  // 掼蛋 v2（升级打A）专用导出（页面展示队伍战况与组队提示）
+  isGuandanV2: isGuandanV2,
+  computeGuandanState: computeGuandanState,
+  gdTeamOfPlayerIndex: gdTeamOfPlayerIndex,
+  gdTeamLabel: gdTeamLabel,
+  gdTeamMemberNames: gdTeamMemberNames,
+  gdLevelText: gdLevelText
 };

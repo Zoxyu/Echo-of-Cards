@@ -58,7 +58,7 @@
       bindtap="onSelectCount"
     >{{item}}人</view>
   </view>
-  <view wx:if="{{countDisabled}}" class="faint fixed-hint">斗地主固定 3 人，人数不可调整</view>
+  <view wx:if="{{countDisabled && countHintText}}" class="faint fixed-hint">{{countHintText}}</view>
 
   <!-- 玩家列表 -->
   <view class="section-title">玩家列表</view>

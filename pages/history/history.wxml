@@ -56,6 +56,7 @@
                 <text class="cell-delta {{cell.cls}}">{{cell.text}}</text>
               </view>
             </view>
+            <view wx:if="{{rd.note}}" class="his-note">{{rd.note}}</view>
           </view>
         </view>
       </block>

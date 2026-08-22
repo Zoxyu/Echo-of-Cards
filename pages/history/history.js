@@ -57,7 +57,7 @@ Page({
       for (var i = 0; i < g.players.length; i++) {
         if (g.players[i].id === winnerId) { winner = g.players[i]; break; }
       }
-      // 全量回合流水（含 void 轮，展示时灰显）
+      // 全量回合流水（含 void 轮，展示时灰显；掼蛋 v2 回合附带结果备注）
       var roundRows = g.rounds.map(function (r, idx) {
         var cells = g.players.map(function (p) {
           var d = Number(r.deltas[p.id]) || 0;
@@ -73,9 +73,30 @@ Page({
           seq: idx + 1,
           timeText: fmtDateTime(r.ts),
           voided: r.status === 'void',
+          note: (r.meta && r.meta.note) || '',
           cells: cells
         };
       });
+      // 掼蛋 v2 大赢家按队伍展示：过 A 的队伍；未过 A 则展示进度领先队
+      var winnerLabel = (mode && mode.ascending) ? '最优者' : '大赢家';
+      var winnerName = winner ? winner.name : '—';
+      var winnerShort = winner ? winner.name.charAt(0) : '—';
+      var winnerColor = winner ? winner.color : '#5c6470';
+      if (engine.isGuandanV2(g)) {
+        var gstate = engine.computeGuandanState(g);
+        var t0 = gstate.teams[0], t1 = gstate.teams[1];
+        var lt = gstate.winnerTeam !== null
+          ? gstate.winnerTeam
+          : (t0.progress >= t1.progress ? 0 : 1);
+        var firstMember = null;
+        for (var mi = 0; mi < g.players.length; mi++) {
+          if (engine.gdTeamOfPlayerIndex(mi) === lt) { firstMember = g.players[mi]; break; }
+        }
+        winnerLabel = '获胜队';
+        winnerName = engine.gdTeamLabel(lt) + '（' + engine.gdTeamMemberNames(g, lt) + '）';
+        winnerShort = engine.gdTeamLabel(lt).charAt(0);
+        winnerColor = firstMember ? firstMember.color : '#5c6470';
+      }
       return {
         id: g.id,
         endedAt: g.endedAt || g.createdAt || 0,
@@ -84,10 +105,10 @@ Page({
         playerCount: g.players.length,
         roundCount: g.rounds.length,
         // 获胜者文案按模式方向派生：asc → "最优者"，WXML 只绑变量
-        winnerLabel: (mode && mode.ascending) ? '最优者' : '大赢家',
-        winnerName: winner ? winner.name : '—',
-        winnerShort: winner ? winner.name.charAt(0) : '—',
-        winnerColor: winner ? winner.color : '#5c6470',
+        winnerLabel: winnerLabel,
+        winnerName: winnerName,
+        winnerShort: winnerShort,
+        winnerColor: winnerColor,
         targetText: g.targetScore ? '目标 ' + g.targetScore + ' 分' : '',
         expanded: false,
         roundRows: roundRows
@@ -141,6 +162,8 @@ Page({
     feedback.tap(); // 再来一局轻反馈
     var options = {};
     if (src.targetScore) options.targetScore = src.targetScore;
+    // 旧版掼蛋（攒分升级）历史局：显式复刻 v1 规则；新掼蛋局缺省走 v2 升级打A
+    if (src.modeId === 'guandan' && src.gdVer !== 2) options.gdVer = 1;
     // 继承源对局校验开关（旧对局缺字段视为开）
     if (src.strictZeroSum === false) options.strictZeroSum = false;
     var game = engine.createGame(src.modeId, src.players, options);

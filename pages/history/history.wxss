@@ -108,6 +108,14 @@
 .cell-delta {
   font-weight: 700;
 }
+/* 掼蛋 v2 回合结果备注（如"1队 双上 升3级 → 打6"） */
+.his-note {
+  margin-top: 10rpx;
+  padding-top: 8rpx;
+  border-top: 1rpx dashed var(--line-soft);
+  font-size: var(--fs-1);
+  color: var(--accent-text);
+}
 
 /* ---------- 操作按钮 ---------- */
 .his-actions {

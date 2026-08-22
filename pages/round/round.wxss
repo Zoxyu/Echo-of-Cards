@@ -89,6 +89,60 @@
   font-weight: 700;
 }
 
+/* ---------- 掼蛋 v2：队伍战况面板 ---------- */
+.gd-board {
+  gap: 16rpx;
+  margin: 8rpx 0 20rpx;
+}
+.gd-team {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1rpx solid var(--line-soft);
+  border-radius: var(--r-2);
+  padding: 20rpx 22rpx;
+}
+.gd-team.gd-win {
+  border-color: var(--accent);
+  background: linear-gradient(170deg, var(--accent-tint-strong), var(--bg-card));
+}
+.gd-label {
+  font-size: var(--fs-2);
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 2rpx;
+}
+.gd-win-tag {
+  font-size: var(--fs-1);
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: var(--r-full);
+  padding: 2rpx 14rpx;
+  font-weight: 700;
+}
+.gd-level {
+  margin-top: 10rpx;
+  font-size: var(--fs-5);
+  font-weight: 800;
+  letter-spacing: 2rpx;
+}
+.gd-members {
+  margin-top: 12rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+.gd-member {
+  gap: 10rpx;
+  font-size: var(--fs-1);
+  color: var(--text-dim);
+}
+.gd-fails {
+  margin-top: 12rpx;
+  font-size: var(--fs-1);
+  color: var(--bad);
+  font-weight: 700;
+}
+
 /* ---------- 目标分进度 ---------- */
 .target-progress {
   margin-bottom: 20rpx;
@@ -202,6 +256,23 @@
   background: rgba(76, 217, 123, 0.16);
   color: var(--good);
   font-weight: 700;
+}
+/* 掼蛋队友名次选中态（金色强调，与选择 chip 一致） */
+.seg-on-gd {
+  background: var(--accent-tint);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+/* 掼蛋头游 chip 上的队伍小标 */
+.gd-chip-team {
+  font-size: var(--fs-1);
+  color: var(--text-faint);
+}
+/* 掼蛋规则提示小字 */
+.gd-rule-hint {
+  margin-top: 24rpx;
+  line-height: 1.7;
+  font-size: var(--fs-1);
 }
 .mul-chip {
   font-size: var(--fs-2);
@@ -327,6 +398,14 @@
 }
 .cell-delta {
   font-weight: 700;
+}
+/* 掼蛋 v2 回合结果备注（如"1队 双上 升3级 → 打6"） */
+.round-note {
+  margin-top: 12rpx;
+  padding-top: 10rpx;
+  border-top: 1rpx dashed var(--line-soft);
+  font-size: var(--fs-1);
+  color: var(--accent-text);
 }
 .list-tip {
   text-align: center;
