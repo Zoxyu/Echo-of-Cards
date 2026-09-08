@@ -3,6 +3,7 @@
 var engine = require('../../utils/scoreEngine');
 var storageKit = require('../../utils/storageKit');
 var feedback = require('../../utils/feedbackKit');
+var shareKit = require('../../utils/shareKit');
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
@@ -174,5 +175,17 @@ Page({
       return;
     }
     wx.navigateTo({ url: '/pages/round/round?id=' + game.id });
+  },
+
+  // ---------- 微信原生分享 ----------
+
+  // 发送给朋友（战绩数据不随链接转移，落地统一回首页）
+  onShareAppMessage: function () {
+    return shareKit.appMessage();
+  },
+
+  // 分享到朋友圈（本页可独立落地：直接读归档列表）
+  onShareTimeline: function () {
+    return shareKit.timeline();
   }
 });
