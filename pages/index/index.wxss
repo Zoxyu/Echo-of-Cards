@@ -206,6 +206,29 @@
   color: var(--accent-text);
 }
 
+/* 分享入口（button open-type=share）：外观对齐历史战绩入口行，
+   逐项重置 button 默认样式（底色/字号/居中/::after 边框） */
+.share-entry {
+  margin-top: var(--sp-4);
+  background: var(--bg-soft);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-2);
+  padding: 30rpx 32rpx;
+  font-size: inherit;
+  font-weight: 600;
+  color: inherit;
+  text-align: left;
+  line-height: normal;
+}
+.share-entry::after {
+  border: none;
+}
+.share-hint {
+  margin-top: 12rpx;
+  text-align: center;
+  font-size: var(--fs-1);
+}
+
 .page-foot {
   margin-top: var(--sp-5);
   text-align: center;

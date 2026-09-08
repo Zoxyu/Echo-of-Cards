@@ -133,6 +133,13 @@
     <text class="history-arrow">›</text>
   </view>
 
+  <!-- 微信原生分享入口：按钮触发「发送给朋友」；朋友圈经任一页右上角菜单 -->
+  <button class="share-entry flex aic jcb" open-type="share" hover-class="press-hover" hover-stay-time="80">
+    <text>分享给牌友</text>
+    <text class="history-arrow">›</text>
+  </button>
+  <view class="faint share-hint">分享到朋友圈：任一页右上角「…」菜单</view>
+
   <view class="page-foot">纯本地记录 · 数据仅存于本机</view>
 </view>
 </view>

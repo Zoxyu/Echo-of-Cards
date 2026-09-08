@@ -3,6 +3,7 @@
 var engine = require('../../utils/scoreEngine');
 var storageKit = require('../../utils/storageKit');
 var feedback = require('../../utils/feedbackKit');
+var shareKit = require('../../utils/shareKit');
 
 // 8 色玩家色板（与 app.wxss 的 --pc0~--pc7 保持一致）
 var COLORS = ['#f5b942', '#4cc3ff', '#4cd97b', '#ff6b5e', '#b48cff', '#ff9f43', '#3ee0c8', '#ff7ab8'];
@@ -265,5 +266,17 @@ Page({
 
   onGoHistory: function () {
     wx.navigateTo({ url: '/pages/history/history' });
+  },
+
+  // ---------- 微信原生分享 ----------
+
+  // 发送给朋友（右上角菜单转发 + 首页「分享给牌友」按钮）
+  onShareAppMessage: function () {
+    return shareKit.appMessage();
+  },
+
+  // 分享到朋友圈（右上角菜单）
+  onShareTimeline: function () {
+    return shareKit.timeline();
   }
 });
