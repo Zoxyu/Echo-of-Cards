@@ -428,6 +428,24 @@
   letter-spacing: 2rpx;
 }
 
+/* ---------- 朋友圈单页模式落地卡片 ---------- */
+.landing-card {
+  margin-top: 80rpx;
+  padding: 72rpx 48rpx;
+  text-align: center;
+}
+.landing-text {
+  margin-top: 20rpx;
+  font-size: var(--fs-3);
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+.landing-tip {
+  margin-top: 28rpx;
+  line-height: 1.8;
+  font-size: var(--fs-1);
+}
+
 /* ---------- 终局结算面板 ---------- */
 .mask {
   position: fixed;

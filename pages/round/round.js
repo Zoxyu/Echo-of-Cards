@@ -3,6 +3,7 @@
 var engine = require('../../utils/scoreEngine');
 var storageKit = require('../../utils/storageKit');
 var feedback = require('../../utils/feedbackKit');
+var shareKit = require('../../utils/shareKit');
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
@@ -80,7 +81,10 @@ Page({
     finalRanking: [],
     finalWinnerName: '',
     finalWinnerShort: '',
-    finalWinnerColor: ''
+    finalWinnerColor: '',
+
+    // ---------- 朋友圈单页模式落地 ----------
+    shareLanding: false  // 朋友圈打开且本机无该对局时，仅展示品牌落地卡片
   },
 
   // ---------- 内存变量（键盘输入过程不 setData） ----------
@@ -111,8 +115,20 @@ Page({
       if (active[i].id === id) { game = active[i]; break; }
     }
     if (!game) {
+      // 朋友圈单页模式（scene 1154）禁止跳页：改为品牌落地卡片，不 toast 不返回
+      var scene = 0;
+      try { scene = (wx.getLaunchOptionsSync() || {}).scene || 0; } catch (e) {}
+      if (scene === 1154) {
+        this.setData({ shareLanding: true });
+        return;
+      }
       wx.showToast({ title: '对局不存在或已归档', icon: 'none' });
-      setTimeout(function () { wx.navigateBack(); }, 800);
+      setTimeout(function () {
+        // 朋友圈单页模式打开本页时无上一页可退，兜底回首页
+        wx.navigateBack({
+          fail: function () { wx.redirectTo({ url: '/pages/index/index' }); }
+        });
+      }, 800);
       return;
     }
     this._game = game;
@@ -753,5 +769,17 @@ Page({
         wx.redirectTo({ url: '/pages/index/index' });
       }
     });
+  },
+
+  // ---------- 微信原生分享 ----------
+
+  // 发送给朋友：文案带当前模式名，落地统一回首页（对局数据不随链接转移）
+  onShareAppMessage: function () {
+    return shareKit.appMessage('声声入册 · ' + this.data.modeName + ' 记分进行中');
+  },
+
+  // 分享到朋友圈：单页模式打开本页，缺对局时 onLoad 已兜底回首页
+  onShareTimeline: function () {
+    return shareKit.timeline('声声入册 · ' + this.data.modeName + ' 记分进行中');
   }
 });

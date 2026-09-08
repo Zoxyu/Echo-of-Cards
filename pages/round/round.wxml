@@ -4,6 +4,17 @@
 <custom-nav title="计分局" back="true" />
 <view class="page" style="padding-top: {{navPad}}px;">
 
+  <!-- 朋友圈单页模式落地：本机无该对局数据且单页模式禁止跳页，仅展示品牌卡片 -->
+  <block wx:if="{{shareLanding}}">
+    <view class="card landing-card">
+      <view class="settle-kicker">ECHO LEDGER</view>
+      <view class="settle-title">声声入册</view>
+      <view class="landing-text">线下记分小簿 · 打开即用</view>
+      <view class="faint landing-tip">朋友圈单页模式仅展示本卡片；完整记分体验请在微信中打开「声声入册」小程序</view>
+    </view>
+  </block>
+  <block wx:else>
+
   <!-- 顶栏：模式标签 + 撤销 + 结束 -->
   <view class="topbar flex aic jcb">
     <view class="mode-tag">{{modeName}}</view>
@@ -246,6 +257,7 @@
       </view>
     </view>
   </view>
+  </block>
 
 </view>
 </view>
